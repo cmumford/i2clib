@@ -15,7 +15,7 @@
 
 namespace i2c {
 
-class I2COperation;
+class Operation;
 
 /**
  * Perform read and write operations on the specified I2C bus.
@@ -49,7 +49,7 @@ class Master {
    *
    * @return The operation pointer - null if error creating operation.
    */
-  std::unique_ptr<I2COperation> CreateWriteOp(uint8_t slave_addr,
+  std::unique_ptr<Operation> CreateWriteOp(uint8_t slave_addr,
                                               uint8_t reg,
                                               const char* op_name);
 
@@ -58,7 +58,7 @@ class Master {
    *
    * @return The operation pointer - null if error creating operation.
    */
-  std::unique_ptr<I2COperation> CreateReadOp(uint8_t slave_addr,
+  std::unique_ptr<Operation> CreateReadOp(uint8_t slave_addr,
                                              uint8_t reg,
                                              const char* op_name);
 

@@ -22,9 +22,9 @@ enum class OperationType { READ, WRITE };
  * The command is started when this instance is created, and this instance
  * will automatically stop the operation when deleted.
  */
-class I2COperation {
+class Operation {
  public:
-  ~I2COperation();
+  ~Operation();
 
   /**
    * Queue a read to be executed later.
@@ -70,7 +70,7 @@ class I2COperation {
  private:
   friend class Master;
 
-  I2COperation(i2c_cmd_handle_t cmd,
+  Operation(i2c_cmd_handle_t cmd,
                i2c_port_t i2c_num,
                SemaphoreHandle_t i2c_mutex,
                const char* op_name);

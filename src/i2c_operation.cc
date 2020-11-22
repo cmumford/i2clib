@@ -21,13 +21,13 @@ constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
 constexpr bool ACK_CHECK_EN = true;  ///< I2C master will check ack from slave.
 }  // namespace
 
-I2COperation::I2COperation(i2c_cmd_handle_t cmd,
+Operation::Operation(i2c_cmd_handle_t cmd,
                            i2c_port_t i2c_num,
                            SemaphoreHandle_t i2c_mutex,
                            const char* op_name)
     : cmd_(cmd), i2c_num_(i2c_num), i2c_mutex_(i2c_mutex), name_(op_name) {}
 
-I2COperation::~I2COperation() {
+Operation::~Operation() {
   if (cmd_) {
     ESP_LOGW(TAG, "Op \"%s\" created but never executed (doing so now).",
              name_);
@@ -35,7 +35,7 @@ I2COperation::~I2COperation() {
   }
 }
 
-bool I2COperation::Read(void* dst, size_t num_bytes) {
+bool Operation::Read(void* dst, size_t num_bytes) {
   esp_err_t err;
   if (num_bytes > 1) {
     err = i2c_master_read(cmd_, static_cast<uint8_t*>(dst), num_bytes - 1,
@@ -49,17 +49,17 @@ READ_END:
   return err == ESP_OK;
 }
 
-bool I2COperation::Write(const void* data, size_t num_bytes) {
+bool Operation::Write(const void* data, size_t num_bytes) {
   // In newer IDF's data is const.
   return i2c_master_write(cmd_, (uint8_t*)(data), num_bytes, ACK_CHECK_EN) ==
          ESP_OK;
 }
 
-bool I2COperation::WriteByte(uint8_t val) {
+bool Operation::WriteByte(uint8_t val) {
   return i2c_master_write_byte(cmd_, val, I2C_MASTER_ACK) == ESP_OK;
 }
 
-bool I2COperation::Execute() {
+bool Operation::Execute() {
   if (!cmd_)
     return true;
 
@@ -88,7 +88,7 @@ bool I2COperation::Execute() {
   return true;
 }
 
-bool I2COperation::Restart(uint8_t slave_addr,
+bool Operation::Restart(uint8_t slave_addr,
                            uint8_t reg,
                            OperationType type) {
   esp_err_t err = i2c_master_start(cmd_);

@@ -64,7 +64,7 @@ Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
 Master::~Master() = default;
 
 bool Master::WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
-  std::unique_ptr<I2COperation> op = CreateWriteOp(addr, reg, "WriteRegister");
+  std::unique_ptr<Operation> op = CreateWriteOp(addr, reg, "WriteRegister");
   if (!op)
     return false;
   if (!op->WriteByte(val))
@@ -73,7 +73,7 @@ bool Master::WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
 }
 
 bool Master::ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val) {
-  std::unique_ptr<I2COperation> op = CreateReadOp(addr, reg, "ReadRegister");
+  std::unique_ptr<Operation> op = CreateReadOp(addr, reg, "ReadRegister");
   if (!op)
     return false;
   if (!op->Read(val, sizeof(*val)))
@@ -104,7 +104,7 @@ PING_DONE:
   return err == ESP_OK;
 }
 
-std::unique_ptr<I2COperation> Master::CreateWriteOp(uint8_t slave_addr,
+std::unique_ptr<Operation> Master::CreateWriteOp(uint8_t slave_addr,
                                                     uint8_t reg,
                                                     const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
@@ -117,11 +117,11 @@ std::unique_ptr<I2COperation> Master::CreateWriteOp(uint8_t slave_addr,
     i2c_cmd_link_delete(cmd);
     return nullptr;
   }
-  return std::unique_ptr<I2COperation>(
-      new I2COperation(cmd, i2c_num_, i2c_mutex_, op_name));
+  return std::unique_ptr<Operation>(
+      new Operation(cmd, i2c_num_, i2c_mutex_, op_name));
 }
 
-std::unique_ptr<I2COperation> Master::CreateReadOp(uint8_t slave_addr,
+std::unique_ptr<Operation> Master::CreateReadOp(uint8_t slave_addr,
                                                    uint8_t reg,
                                                    const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
@@ -142,8 +142,8 @@ READ_OP_DONE:
     i2c_cmd_link_delete(cmd);
     return nullptr;
   }
-  return std::unique_ptr<I2COperation>(
-      new I2COperation(cmd, i2c_num_, i2c_mutex_, op_name));
+  return std::unique_ptr<Operation>(
+      new Operation(cmd, i2c_num_, i2c_mutex_, op_name));
 }
 
 }  // namespace i2c
