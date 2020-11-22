@@ -4,7 +4,7 @@
  * This file is subject to the terms and conditions defined in
  * file 'license.txt', which is part of this source code package.
  */
-#include <i2clib/i2c.h>
+#include <i2clib/operation.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>

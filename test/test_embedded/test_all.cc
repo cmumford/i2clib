@@ -7,7 +7,7 @@
 
 #include <unity.h>
 
-#include <i2clib/i2c.h>
+#include <i2clib/master.h>
 
 /**
  * The I2C bus speed when running tests.

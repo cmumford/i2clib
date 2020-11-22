@@ -5,7 +5,8 @@
  * file 'license.txt', which is part of this source code package.
  */
 
-#include <i2clib/i2c.h>
+#include <i2clib/master.h>
+#include <i2clib/operation.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
