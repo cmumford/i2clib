@@ -23,16 +23,16 @@ SemaphoreHandle_t g_i2c_mutex;
 namespace {
 
 void test_create_master() {
-  std::unique_ptr<i2c::I2CMaster> master(
-      new i2c::I2CMaster(TEST_I2C_PORT1, g_i2c_mutex));
+  std::unique_ptr<i2c::Master> master(
+      new i2c::Master(TEST_I2C_PORT1, g_i2c_mutex));
   TEST_ASSERT_NOT_NULL(master);
 }
 
 void process() {
   g_i2c_mutex = xSemaphoreCreateMutex();
 
-  i2c::I2CMaster::Initialize(TEST_I2C_PORT1, PORT_1_I2C_SDA_GPIO,
-                             PORT_1_I2C_CLK_GPIO, kI2CClockHz);
+  i2c::Master::Initialize(TEST_I2C_PORT1, PORT_1_I2C_SDA_GPIO,
+                          PORT_1_I2C_CLK_GPIO, kI2CClockHz);
 
   UNITY_BEGIN();
 

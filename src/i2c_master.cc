@@ -38,10 +38,10 @@ i2c_cmd_handle_t StartWriteCommand(uint8_t slave_addr) {
 }  // namespace
 
 // Static
-bool I2CMaster::Initialize(uint8_t i2c_bus,
-                           uint8_t sda_gpio,
-                           uint8_t scl_gpio,
-                           uint32_t clk_speed) {
+bool Master::Initialize(uint8_t i2c_bus,
+                        uint8_t sda_gpio,
+                        uint8_t scl_gpio,
+                        uint32_t clk_speed) {
   const i2c_config_t config = {
       .mode = I2C_MODE_MASTER,
       .sda_io_num = sda_gpio,
@@ -58,12 +58,12 @@ bool I2CMaster::Initialize(uint8_t i2c_bus,
   return i2c_driver_install(i2c_bus, I2C_MODE_MASTER, 0, 0, 0) == ESP_OK;
 }
 
-I2CMaster::I2CMaster(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
+Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
     : i2c_num_(i2c_num), i2c_mutex_(i2c_mutex) {}
 
-I2CMaster::~I2CMaster() = default;
+Master::~Master() = default;
 
-bool I2CMaster::WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
+bool Master::WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
   std::unique_ptr<I2COperation> op = CreateWriteOp(addr, reg, "WriteRegister");
   if (!op)
     return false;
@@ -72,7 +72,7 @@ bool I2CMaster::WriteRegister(uint8_t addr, uint8_t reg, uint8_t val) {
   return op->Execute();
 }
 
-bool I2CMaster::ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val) {
+bool Master::ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val) {
   std::unique_ptr<I2COperation> op = CreateReadOp(addr, reg, "ReadRegister");
   if (!op)
     return false;
@@ -81,7 +81,7 @@ bool I2CMaster::ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val) {
   return op->Execute();
 }
 
-bool I2CMaster::Ping(uint8_t addr) {
+bool Master::Ping(uint8_t addr) {
   i2c_cmd_handle_t cmd = StartWriteCommand(addr);
   if (!cmd)
     return false;
@@ -104,9 +104,9 @@ PING_DONE:
   return err == ESP_OK;
 }
 
-std::unique_ptr<I2COperation> I2CMaster::CreateWriteOp(uint8_t slave_addr,
-                                                       uint8_t reg,
-                                                       const char* op_name) {
+std::unique_ptr<I2COperation> Master::CreateWriteOp(uint8_t slave_addr,
+                                                    uint8_t reg,
+                                                    const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
   if (!cmd)
     return nullptr;
@@ -121,9 +121,9 @@ std::unique_ptr<I2COperation> I2CMaster::CreateWriteOp(uint8_t slave_addr,
       new I2COperation(cmd, i2c_num_, i2c_mutex_, op_name));
 }
 
-std::unique_ptr<I2COperation> I2CMaster::CreateReadOp(uint8_t slave_addr,
-                                                      uint8_t reg,
-                                                      const char* op_name) {
+std::unique_ptr<I2COperation> Master::CreateReadOp(uint8_t slave_addr,
+                                                   uint8_t reg,
+                                                   const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
   if (!cmd)
     return nullptr;

@@ -20,7 +20,7 @@ class I2COperation;
 /**
  * Perform read and write operations on the specified I2C bus.
  */
-class I2CMaster {
+class Master {
  public:
   /**
    * @brief Initialize the I2C bus.
@@ -37,9 +37,8 @@ class I2CMaster {
                          uint8_t scl_gpio,
                          uint32_t clk_speed);
 
-  I2CMaster(i2c_port_t i2c_num = I2C_NUM_0,
-            SemaphoreHandle_t i2c_mutex = nullptr);
-  ~I2CMaster();
+  Master(i2c_port_t i2c_num = I2C_NUM_0, SemaphoreHandle_t i2c_mutex = nullptr);
+  ~Master();
 
   bool WriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
   bool ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val);

@@ -68,7 +68,7 @@ class I2COperation {
   bool Execute();
 
  private:
-  friend class I2CMaster;
+  friend class Master;
 
   I2COperation(i2c_cmd_handle_t cmd,
                i2c_port_t i2c_num,
