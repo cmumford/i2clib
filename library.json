@@ -1,0 +1,27 @@
+{
+    "authors": [
+        {
+            "email": "cmumford@cmumford.com",
+            "name": "Chris Mumford",
+            "url": "https://github.com/cmumford"
+        }
+    ],
+    "build": {
+        "srcFilter": [
+            "+<*.cc>",
+            "+<*.h>"
+        ]
+    },
+    "description": "A basic library to simplify I2C",
+    "frameworks": "*",
+    "homepage": "https://github.com/cmumford/I2Clib",
+    "keywords": "I2C",
+    "license": "MIT",
+    "name": "I2Clib",
+    "platforms": "*",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cmumford/I2Clib"
+    },
+    "version": "0.1.0"
+}

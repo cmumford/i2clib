@@ -1,0 +1,12 @@
+*~
+html
+Doxyfile*
+doxygen_sqlite3.db
+*.swp
+tags
+build/
+.vscode/
+.DS_Store
+__pycache__/
+*.pyc
+*.pvs
