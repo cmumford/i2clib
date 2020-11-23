@@ -24,7 +24,11 @@ enum class OperationType { READ, WRITE };
  */
 class Operation {
  public:
+  Operation(const Operation&) = delete;
+  Operation(Operation&&) = default;
   ~Operation();
+
+  Operation& operator=(Operation&&) = default;
 
   /**
    * Queue a read to be executed later.
@@ -71,9 +75,9 @@ class Operation {
   friend class Master;
 
   Operation(i2c_cmd_handle_t cmd,
-               i2c_port_t i2c_num,
-               SemaphoreHandle_t i2c_mutex,
-               const char* op_name);
+            i2c_port_t i2c_num,
+            SemaphoreHandle_t i2c_mutex,
+            const char* op_name);
 
   i2c_cmd_handle_t cmd_;         // The started command.
   const i2c_port_t i2c_num_;     // I2C bus or port number.

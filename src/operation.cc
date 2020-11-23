@@ -6,12 +6,23 @@
  */
 #include <i2clib/operation.h>
 
+#include <type_traits>
+
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <esp_log.h>
 
 #include <driver/i2c.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+
+static_assert(!std::is_copy_constructible<i2c::Operation>::value,
+              "i2c::Operation cannot be copy constructed");
+static_assert(std::is_move_constructible<i2c::Operation>::value,
+              "i2c::Operation should be move constructed");
+static_assert(!std::is_default_constructible<i2c::Operation>::value,
+              "i2c::Operation cannot be default constructed");
+static_assert(!std::is_copy_assignable<i2c::Operation>::value,
+              "i2c::Operation cannot be copy assigned");
 
 namespace i2c {
 
@@ -22,9 +33,9 @@ constexpr bool ACK_CHECK_EN = true;  ///< I2C master will check ack from slave.
 }  // namespace
 
 Operation::Operation(i2c_cmd_handle_t cmd,
-                           i2c_port_t i2c_num,
-                           SemaphoreHandle_t i2c_mutex,
-                           const char* op_name)
+                     i2c_port_t i2c_num,
+                     SemaphoreHandle_t i2c_mutex,
+                     const char* op_name)
     : cmd_(cmd), i2c_num_(i2c_num), i2c_mutex_(i2c_mutex), name_(op_name) {}
 
 Operation::~Operation() {
@@ -88,9 +99,7 @@ bool Operation::Execute() {
   return true;
 }
 
-bool Operation::Restart(uint8_t slave_addr,
-                           uint8_t reg,
-                           OperationType type) {
+bool Operation::Restart(uint8_t slave_addr, uint8_t reg, OperationType type) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;

@@ -6,10 +6,24 @@
  */
 
 #include <i2clib/master.h>
+
+#include <type_traits>
+
 #include <i2clib/operation.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
+
+static_assert(std::is_copy_constructible<i2c::Master>::value,
+              "i2c::Master should be copy constructed");
+static_assert(std::is_move_constructible<i2c::Master>::value,
+              "i2c::Master should be move constructed");
+static_assert(std::is_default_constructible<i2c::Master>::value,
+              "i2c::Master should be default constructed");
+static_assert(std::is_copy_assignable<i2c::Master>::value,
+              "i2c::Master should be copy assignable");
+static_assert(std::is_move_assignable<i2c::Master>::value,
+              "i2c::Master should be move assignable");
 
 namespace i2c {
 
@@ -105,8 +119,8 @@ PING_DONE:
 }
 
 std::unique_ptr<Operation> Master::CreateWriteOp(uint8_t slave_addr,
-                                                    uint8_t reg,
-                                                    const char* op_name) {
+                                                 uint8_t reg,
+                                                 const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
   if (!cmd)
     return nullptr;
@@ -122,8 +136,8 @@ std::unique_ptr<Operation> Master::CreateWriteOp(uint8_t slave_addr,
 }
 
 std::unique_ptr<Operation> Master::CreateReadOp(uint8_t slave_addr,
-                                                   uint8_t reg,
-                                                   const char* op_name) {
+                                                uint8_t reg,
+                                                const char* op_name) {
   i2c_cmd_handle_t cmd = StartWriteCommand(slave_addr);
   if (!cmd)
     return nullptr;
