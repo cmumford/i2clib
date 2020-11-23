@@ -32,6 +32,9 @@ namespace {
 constexpr char TAG[] = "I2C-master";
 constexpr bool ACK_CHECK_EN = true;
 constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
+constexpr size_t kSlaveReceiveBuffLen = 0;
+constexpr size_t kSlaveTransmitBuffLen = 0;
+constexpr int kInterruptAllocFlags = ESP_INTR_FLAG_IRAM;
 
 i2c_cmd_handle_t StartWriteCommand(uint8_t slave_addr) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -64,19 +67,18 @@ bool Master::Initialize(uint8_t i2c_bus,
       .scl_pullup_en = GPIO_PULLUP_DISABLE,
       .master = {.clk_speed = clk_speed},
   };
-
   esp_err_t err = i2c_param_config(i2c_bus, &config);
-  if (err == ESP_OK)
-    err = i2c_driver_install(i2c_bus, I2C_MODE_MASTER, 0, 0, 0) == ESP_OK;
-
+  if (err == ESP_OK) {
+    err = i2c_driver_install(i2c_bus, I2C_MODE_MASTER, kSlaveReceiveBuffLen,
+                             kSlaveTransmitBuffLen, kInterruptAllocFlags);
+  }
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Error initializing I2C on port %u, SDA/SCL=%d/%d: %s",
              i2c_bus, sda_gpio, scl_gpio, esp_err_to_name(err));
     return false;
   }
-
-  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d: %s", i2c_bus,
-           sda_gpio, scl_gpio, esp_err_to_name(err));
+  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", i2c_bus, sda_gpio,
+           scl_gpio);
   return true;
 }
 
