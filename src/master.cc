@@ -70,16 +70,15 @@ bool Master::Initialize(uint8_t i2c_bus,
     err = i2c_driver_install(i2c_bus, I2C_MODE_MASTER, 0, 0, 0) == ESP_OK;
 
   if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Error initializing I2C on port%u, SDA/SCL=%d/%d: %s",
+    ESP_LOGE(TAG, "Error initializing I2C on port %u, SDA/SCL=%d/%d: %s",
              i2c_bus, sda_gpio, scl_gpio, esp_err_to_name(err));
     return false;
   }
 
-  ESP_LOGD(TAG, "I2C initialized on port%u, SDA/SCL=%d/%d: %s", i2c_bus,
+  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d: %s", i2c_bus,
            sda_gpio, scl_gpio, esp_err_to_name(err));
   return true;
 }
-
 
 Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
     : i2c_num_(i2c_num), i2c_mutex_(i2c_mutex) {}
