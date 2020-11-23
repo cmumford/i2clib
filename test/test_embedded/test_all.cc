@@ -22,6 +22,12 @@ SemaphoreHandle_t g_i2c_mutex;
 
 namespace {
 
+void test_init_failed() {
+  constexpr uint8_t kInvalidI2CPort = 200;
+  TEST_ASSERT_FALSE(i2c::Master::Initialize(
+      kInvalidI2CPort, PORT_1_I2C_SDA_GPIO, PORT_1_I2C_CLK_GPIO, kI2CClockHz));
+}
+
 void test_create_master() {
   std::unique_ptr<i2c::Master> master(
       new i2c::Master(TEST_I2C_PORT1, g_i2c_mutex));
@@ -36,6 +42,7 @@ void process() {
 
   UNITY_BEGIN();
 
+  RUN_TEST(test_init_failed);
   RUN_TEST(test_create_master);
 
   UNITY_END();
