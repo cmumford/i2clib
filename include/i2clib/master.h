@@ -5,7 +5,6 @@
  * file 'license.txt', which is part of this source code package.
  */
 #include <cstdint>
-#include <memory>
 
 #include <driver/i2c.h>
 #include <freertos/FreeRTOS.h>
@@ -42,6 +41,10 @@ class Master {
 
   bool WriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
   bool ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val);
+  /**
+   * Read from the specified I2C slave.
+   */
+  bool Read(uint8_t slave_addr, void* buff, size_t buff_size, bool send_start);
   bool Ping(uint8_t addr);
 
   /**
@@ -49,18 +52,21 @@ class Master {
    *
    * @return The operation pointer - null if error creating operation.
    */
-  std::unique_ptr<Operation> CreateWriteOp(uint8_t slave_addr,
-                                           uint8_t reg,
-                                           const char* op_name);
+  Operation CreateWriteOp(uint8_t slave_addr, uint8_t reg, const char* op_name);
 
   /**
    * Start an I2C read operation to the I2C slave address.
    *
    * @return The operation pointer - null if error creating operation.
    */
-  std::unique_ptr<Operation> CreateReadOp(uint8_t slave_addr,
-                                          uint8_t reg,
-                                          const char* op_name);
+  Operation CreateReadOp(uint8_t slave_addr, uint8_t reg, const char* op_name);
+
+  /**
+   * Create a started I2C read operation from the I2C slave address.
+   *
+   * @return The operation pointer - null if error creating operation.
+   */
+  Operation CreateReadOp(uint8_t slave_addr, const char* op_name);
 
  private:
   i2c_port_t i2c_num_;

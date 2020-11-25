@@ -14,8 +14,6 @@
 
 namespace i2c {
 
-enum class OperationType { READ, WRITE };
-
 /**
  * A single I2C command operation.
  *
@@ -24,6 +22,13 @@ enum class OperationType { READ, WRITE };
  */
 class Operation {
  public:
+  enum class Type { READ, WRITE };
+
+  enum class ExecuteEnd {
+    SendStop,
+    NoStop,
+  };
+
   Operation(const Operation&) = delete;
   Operation(Operation&&) = default;
   ~Operation();
@@ -52,7 +57,7 @@ class Operation {
    * @brief Queue a write operation.
    *
    * @param val The data to write
-   * @param num_bytes The size of \p val.
+   * @param num_bytes The size (in bytes) of \p val.
    *
    * @return true if successfully enqueued, false upon error.
    */
@@ -61,26 +66,58 @@ class Operation {
   /**
    * Restart the I2C operation.
    *
+   * This will restart an I2C operation at the current register. Many I2C
+   * devices will auto-increment the current register. This version of the
+   * restart will not change the current register.
+   *
+   * @param type        The operation type (i.e. read/write).
+   */
+  bool Restart(Type type);
+
+  /**
+   * Restart the I2C operation.
+   *
    * When this instance is created the operation is already started. This will
    * enqueue another start into this operation.
+   *
+   * @param reg         The register where reading/writing will now commence.
+   * @param type        The operation type (i.e. read/write).
    */
-  bool Restart(uint8_t i2c_address, uint8_t reg, OperationType type);
+  bool RestartReg(uint8_t reg, Type type);
 
   /**
    * Execute all queued tasks.
+   *
+   * @param end Whether to end this operation. If ExecuteEnd::SendStop
+   *            (default), then this operation is stopped, and no further
+   *            actions will succeed. If not then further actions can be
+   *            requested.
    */
-  bool Execute();
+  bool Execute(ExecuteEnd end = ExecuteEnd::SendStop);
+
+  /**
+   * Is this ready to be used?
+   */
+  bool ready() const { return !stopped_; }
 
  private:
   friend class Master;
 
+  /**
+   * Create an invalid (already stopped) operation.
+   */
+  Operation(const char* op_name);
+
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,
+            uint8_t slave_addr,
             SemaphoreHandle_t i2c_mutex,
             const char* op_name);
 
+  bool stopped_;                 // Was I2C STOP ever written?
   i2c_cmd_handle_t cmd_;         // The started command.
   const i2c_port_t i2c_num_;     // I2C bus or port number.
+  const uint8_t slave_addr_;     // I2C slave address.
   SemaphoreHandle_t i2c_mutex_;  // Mutex used for synchronization.
   const char* name_;             // The operation name - used for debugging.
 };
