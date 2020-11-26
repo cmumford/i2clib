@@ -24,27 +24,49 @@ SemaphoreHandle_t g_i2c_mutex;
 
 namespace {
 
-void test_init_failed() {
+bool InitI2C(uint8_t i2c_bus) {
+  return Master::Initialize(i2c_bus, PORT_1_I2C_SDA_GPIO, PORT_1_I2C_CLK_GPIO,
+                            kI2CClockHz);
+}
+
+void test_invalid_init_port() {
   constexpr uint8_t kInvalidI2CPort = 200;
-  TEST_ASSERT_FALSE(Master::Initialize(
-      kInvalidI2CPort, PORT_1_I2C_SDA_GPIO, PORT_1_I2C_CLK_GPIO, kI2CClockHz));
+  TEST_ASSERT_FALSE(InitI2C(kInvalidI2CPort));
+}
+
+void test_double_init() {
+  TEST_ASSERT_TRUE(InitI2C(TEST_I2C_PORT1));
+
+  TEST_ASSERT_FALSE(InitI2C(TEST_I2C_PORT1));
 }
 
 void test_create_master() {
+  InitI2C(TEST_I2C_PORT1);
+
   Master master(TEST_I2C_PORT1, g_i2c_mutex);
   // Not much to test - no crash.
+}
+
+void test_shutdown_ok() {
+  TEST_ASSERT_TRUE(InitI2C(TEST_I2C_PORT1));
+
+  TEST_ASSERT_TRUE(Master::Shutdown(TEST_I2C_PORT1));
+}
+
+void test_shutdown_not_running() {
+  TEST_ASSERT_FALSE(Master::Shutdown(TEST_I2C_PORT1));
 }
 
 void process() {
   g_i2c_mutex = xSemaphoreCreateMutex();
 
-  Master::Initialize(TEST_I2C_PORT1, PORT_1_I2C_SDA_GPIO,
-                          PORT_1_I2C_CLK_GPIO, kI2CClockHz);
-
   UNITY_BEGIN();
 
-  RUN_TEST(test_init_failed);
+  RUN_TEST(test_invalid_init_port);
+  RUN_TEST(test_double_init);
   RUN_TEST(test_create_master);
+  RUN_TEST(test_shutdown_ok);
+  RUN_TEST(test_shutdown_not_running);
 
   UNITY_END();
 }
@@ -58,7 +80,11 @@ void WaitForDebugMonitor() {
 }  // namespace
 
 // Called before each test.
-void setUp(void) {}
+void setUp() {}
+
+void tearDown() {
+  Master::Shutdown(TEST_I2C_PORT1);
+}
 
 extern "C" void app_main() {
   // If we don't wait, then sometimes the earlier logging will get dropped.

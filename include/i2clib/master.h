@@ -36,6 +36,11 @@ class Master {
                          uint8_t scl_gpio,
                          uint32_t clk_speed);
 
+  /**
+   * Shutdown the initialized I2C bus.
+   */
+  static bool Shutdown(uint8_t i2c_bus);
+
   Master(i2c_port_t i2c_num = I2C_NUM_0, SemaphoreHandle_t i2c_mutex = nullptr);
   ~Master();
 

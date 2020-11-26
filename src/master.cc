@@ -54,7 +54,7 @@ i2c_cmd_handle_t StartCommand(uint8_t slave_addr, i2c_rw_t read_write) {
 
 }  // namespace
 
-// Static
+// static
 bool Master::Initialize(uint8_t i2c_bus,
                         uint8_t sda_gpio,
                         uint8_t scl_gpio,
@@ -80,6 +80,11 @@ bool Master::Initialize(uint8_t i2c_bus,
   ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", i2c_bus, sda_gpio,
            scl_gpio);
   return true;
+}
+
+// static
+bool Master::Shutdown(uint8_t i2c_bus) {
+  return i2c_driver_delete(i2c_bus) == ESP_OK;
 }
 
 Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
