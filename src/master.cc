@@ -55,36 +55,47 @@ i2c_cmd_handle_t StartCommand(uint8_t slave_addr, i2c_rw_t read_write) {
 }  // namespace
 
 // static
-bool Master::Initialize(uint8_t i2c_bus,
-                        uint8_t sda_gpio,
-                        uint8_t scl_gpio,
-                        uint32_t clk_speed) {
+bool Master::Initialize(const InitParams& params) {
   const i2c_config_t config = {
       .mode = I2C_MODE_MASTER,
-      .sda_io_num = sda_gpio,
-      .scl_io_num = scl_gpio,
-      .sda_pullup_en = GPIO_PULLUP_DISABLE,
-      .scl_pullup_en = GPIO_PULLUP_DISABLE,
-      .master = {.clk_speed = clk_speed},
+      .sda_io_num = params.sda_gpio,
+      .scl_io_num = params.scl_gpio,
+      .sda_pullup_en =
+          params.sda_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
+      .scl_pullup_en =
+          params.scl_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
+      .master = {.clk_speed = params.clk_speed},
   };
-  esp_err_t err = i2c_param_config(i2c_bus, &config);
+  esp_err_t err = i2c_param_config(params.i2c_bus, &config);
   if (err == ESP_OK) {
-    err = i2c_driver_install(i2c_bus, I2C_MODE_MASTER, kSlaveReceiveBuffLen,
-                             kSlaveTransmitBuffLen, kInterruptAllocFlags);
+    err = i2c_driver_install(params.i2c_bus, I2C_MODE_MASTER,
+                             kSlaveReceiveBuffLen, kSlaveTransmitBuffLen,
+                             kInterruptAllocFlags);
   }
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "Error initializing I2C on port %u, SDA/SCL=%d/%d: %s",
-             i2c_bus, sda_gpio, scl_gpio, esp_err_to_name(err));
+             params.i2c_bus, params.sda_gpio, params.scl_gpio,
+             esp_err_to_name(err));
     return false;
   }
-  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", i2c_bus, sda_gpio,
-           scl_gpio);
+  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", params.i2c_bus,
+           params.sda_gpio, params.scl_gpio);
   return true;
 }
 
 // static
 bool Master::Shutdown(uint8_t i2c_bus) {
   return i2c_driver_delete(i2c_bus) == ESP_OK;
+}
+
+// static
+bool Master::SetTimeout(uint8_t i2c_bus, int timeout) {
+  return i2c_set_timeout(i2c_bus, timeout) == ESP_OK;
+}
+
+// static
+bool Master::GetTimeout(uint8_t i2c_bus, int* timeout) {
+  return i2c_get_timeout(i2c_bus, timeout) == ESP_OK;
 }
 
 Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
