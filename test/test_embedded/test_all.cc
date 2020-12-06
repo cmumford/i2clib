@@ -25,8 +25,15 @@ SemaphoreHandle_t g_i2c_mutex;
 namespace {
 
 bool InitI2C(uint8_t i2c_bus) {
-  return Master::Initialize(i2c_bus, PORT_1_I2C_SDA_GPIO, PORT_1_I2C_CLK_GPIO,
-                            kI2CClockHz);
+  const Master::InitParams params = {
+      .i2c_bus = i2c_bus,
+      .sda_gpio = PORT_1_I2C_SDA_GPIO,
+      .scl_gpio = PORT_1_I2C_CLK_GPIO,
+      .clk_speed = kI2CClockHz,
+      .sda_pullup_enable = false,
+      .scl_pullup_enable = false,
+  };
+  return Master::Initialize(params);
 }
 
 void test_invalid_init_port() {
