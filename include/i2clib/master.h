@@ -22,7 +22,7 @@ class Operation;
 class Master {
  public:
   /**
-   * Configuration parameters for the I2C bus.
+   * Initialization parameters for the I2C bus.
    */
   struct InitParams {
     uint8_t i2c_bus;         // The I2C bus (or port).
@@ -35,6 +35,9 @@ class Master {
 
   /**
    * @brief Initialize an I2C bus master.
+   *
+   * This only need be called once for each bus before creating instances of
+   * this class.
    *
    * @param params Master initialization parameters.
    *
@@ -67,15 +70,52 @@ class Master {
    */
   static bool GetTimeout(uint8_t i2c_bus, int* timeout);
 
+  /**
+   * Construct a new Master object to interract with an I2C bus as a master.
+   *
+   * The name "Master" might be slightly misleading as there can be as many
+   * of these objects instantiated for a given I2C bus as desired.
+   *
+   * @param i2c_num The I2C bus/port number.
+   * @param i2c_mutex An optional mutex to synchronize all access to the bus.
+   */
   Master(i2c_port_t i2c_num = I2C_NUM_0, SemaphoreHandle_t i2c_mutex = nullptr);
   ~Master();
 
+  /**
+   * Write a single byte value to the specified register.
+   *
+   * @param addr The I2C slave address.
+   * @param reg  The I2C slave register.
+   * @param val  The byte to write.
+   *
+   * @return true when successful, false when not.
+   */
   bool WriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
+
+  /**
+   * Read a single byte value from the specified register.
+   *
+   * @param addr The I2C slave address.
+   * @param reg  The I2C slave register.
+   * @param val  Location to store the read byte.
+   *
+   * @return true when successful, false when not.
+   */
   bool ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val);
+
   /**
    * Read from the specified I2C slave.
    */
   bool Read(uint8_t slave_addr, void* buff, size_t buff_size, bool send_start);
+
+  /**
+   * Detect if a slave device is listening at a specific address.
+   *
+   * @param addr The I2C address.
+   *
+   * @return true if successful, false if not.
+   */
   bool Ping(uint8_t addr);
 
   /**
@@ -100,8 +140,8 @@ class Master {
   Operation CreateReadOp(uint8_t slave_addr, const char* op_name);
 
  private:
-  i2c_port_t i2c_num_;
-  SemaphoreHandle_t i2c_mutex_;
+  i2c_port_t i2c_num_;  // The I2C port on which this object communicates.
+  SemaphoreHandle_t i2c_mutex_;  // Sync mutex. If null will not sync.
 };
 
 }  // namespace i2c
