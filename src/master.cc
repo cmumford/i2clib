@@ -64,7 +64,11 @@ bool Master::Initialize(const InitParams& params) {
           params.sda_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
       .scl_pullup_en =
           params.scl_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
-      .master = {.clk_speed = params.clk_speed},
+      .master =
+          {
+              .clk_speed = params.clk_speed,
+          },
+      .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL,
   };
   esp_err_t err = i2c_param_config(params.i2c_bus, &config);
   if (err == ESP_OK) {
