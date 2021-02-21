@@ -28,7 +28,7 @@ namespace i2c {
 
 namespace {
 constexpr char TAG[] = "I2C-op";
-constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
+constexpr TickType_t kI2CCmdWaitTicks = pdMS_TO_TICKS(1000);
 constexpr bool ACK_CHECK_EN = true;  ///< I2C master will check ack from slave.
 }  // namespace
 
@@ -123,8 +123,8 @@ bool Operation::Execute(ExecuteEnd end_method) {
 
 EXECUTE_END:
   if (err != ESP_OK) {
-    ESP_LOGE(TAG, "i2c_master_cmd_begin for %s failed: %s", name_,
-             esp_err_to_name(err));
+    ESP_LOGE(TAG, "i2c_master_cmd_begin for %s on port %u failed: %s", name_,
+             i2c_num_, esp_err_to_name(err));
     return false;
   }
 
