@@ -4,13 +4,16 @@
  * This file is subject to the terms and conditions defined in
  * file 'license.txt', which is part of this source code package.
  */
+
+#pragma once
+
 #include <cstdint>
 
 #include <driver/i2c.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
-#pragma once
+#include <i2clib/address.h>
 
 namespace i2c {
 
@@ -91,7 +94,10 @@ class Master {
    *
    * @return true when successful, false when not.
    */
-  bool WriteRegister(uint8_t addr, uint8_t reg, uint8_t val);
+  bool WriteRegister(uint16_t addr,
+                     AddressMode addr_mode,
+                     uint8_t reg,
+                     uint8_t val);
 
   /**
    * Read a single byte value from the specified register.
@@ -102,12 +108,15 @@ class Master {
    *
    * @return true when successful, false when not.
    */
-  bool ReadRegister(uint8_t addr, uint8_t reg, uint8_t* val);
+  bool ReadRegister(uint16_t addr,
+                    AddressMode addr_mode,
+                    uint8_t reg,
+                    uint8_t* val);
 
   /**
    * Read from the specified I2C slave.
    */
-  bool Read(uint8_t slave_addr, void* buff, size_t buff_size, bool send_start);
+  bool Read(uint16_t slave_addr, void* buff, size_t buff_size, bool send_start);
 
   /**
    * Detect if a slave device is listening at a specific address.
@@ -116,28 +125,36 @@ class Master {
    *
    * @return true if successful, false if not.
    */
-  bool Ping(uint8_t addr);
+  bool Ping(uint16_t addr, AddressMode addr_mode);
 
   /**
    * Start an I2C write operation to the I2C slave address.
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateWriteOp(uint8_t slave_addr, uint8_t reg, const char* op_name);
+  Operation CreateWriteOp(uint16_t slave_addr,
+                          AddressMode addr_mode,
+                          uint8_t reg,
+                          const char* op_name);
 
   /**
    * Start an I2C read operation to the I2C slave address.
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateReadOp(uint8_t slave_addr, uint8_t reg, const char* op_name);
+  Operation CreateReadOp(uint16_t slave_addr,
+                         AddressMode addr_mode,
+                         uint8_t reg,
+                         const char* op_name);
 
   /**
    * Create a started I2C read operation from the I2C slave address.
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateReadOp(uint8_t slave_addr, const char* op_name);
+  Operation CreateReadOp(uint16_t slave_addr,
+                         AddressMode addr_mode,
+                         const char* op_name);
 
  private:
   i2c_port_t i2c_num_;  // The I2C port on which this object communicates.

@@ -15,6 +15,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include <i2clib/master.h>
+
 static_assert(!std::is_copy_constructible<i2c::Operation>::value,
               "i2c::Operation cannot be copy constructed");
 static_assert(std::is_move_constructible<i2c::Operation>::value,
@@ -37,18 +39,21 @@ Operation::Operation(const char* op_name)
       cmd_(nullptr),
       i2c_num_(0),
       slave_addr_(0),
+      addr_mode_(AddressMode::bit7),
       i2c_mutex_(nullptr),
       name_(op_name) {}
 
 Operation::Operation(i2c_cmd_handle_t cmd,
                      i2c_port_t i2c_num,
-                     uint8_t slave_addr,
+                     uint16_t slave_addr,
+                     AddressMode addr_mode,
                      SemaphoreHandle_t i2c_mutex,
                      const char* op_name)
     : stopped_(false),
       cmd_(cmd),
       i2c_num_(i2c_num),
       slave_addr_(slave_addr),
+      addr_mode_(addr_mode),
       i2c_mutex_(i2c_mutex),
       name_(op_name) {}
 
@@ -62,7 +67,7 @@ Operation::~Operation() {
 bool Operation::Read(void* dst, size_t num_bytes) {
   if (stopped_)
     return false;
-  if (!cmd_ && !Restart(Type::READ))
+  if (!cmd_ && !Restart(Direction::READ))
     return false;
   esp_err_t err;
   if (num_bytes > 1) {
@@ -78,7 +83,7 @@ READ_END:
 }
 
 bool Operation::Write(const void* data, size_t num_bytes) {
-  if (!stopped_ && !cmd_ && !Restart(Type::WRITE))
+  if (!stopped_ && !cmd_ && !Restart(Direction::WRITE))
     return false;
   // TODO: In newer IDF's data is const. Remove typecast eventually.
   return i2c_master_write(cmd_, (uint8_t*)(data), num_bytes, ACK_CHECK_EN) ==
@@ -88,7 +93,7 @@ bool Operation::Write(const void* data, size_t num_bytes) {
 bool Operation::WriteByte(uint8_t val) {
   if (stopped_)
     return false;
-  if (!cmd_ && !Restart(Type::WRITE))
+  if (!cmd_ && !Restart(Direction::WRITE))
     return false;
   return i2c_master_write_byte(cmd_, val, I2C_MASTER_ACK) == ESP_OK;
 }
@@ -132,7 +137,7 @@ EXECUTE_END:
   return true;
 }
 
-bool Operation::Restart(Type type) {
+bool Operation::Restart(Direction type) {
   if (stopped_)
     return false;
   if (!cmd_) {
@@ -145,31 +150,28 @@ bool Operation::Restart(Type type) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = i2c_master_write_byte(cmd_, (slave_addr_ << 1) | I2C_MASTER_WRITE,
-                              ACK_CHECK_EN);
+  err = WriteAddress(cmd_, slave_addr_, addr_mode_, Direction::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  if (type == Type::WRITE)
+  if (type == Direction::WRITE)
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
-  if (err == ESP_OK) {
-    err = i2c_master_write_byte(cmd_, (slave_addr_ << 1) | I2C_MASTER_READ,
-                                ACK_CHECK_EN);
-  }
+  if (err == ESP_OK)
+    err = WriteAddress(cmd_, slave_addr_, addr_mode_, Direction::READ);
 
 RESTART_DONE:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s restart %s failed: %s (%p)", name_,
-             type == Type::WRITE ? "write" : "read", esp_err_to_name(err),
+             type == Direction::WRITE ? "write" : "read", esp_err_to_name(err),
              cmd_);
     return false;
   }
   ESP_LOGV(TAG, "%s restart %s success.", name_,
-           type == Type::WRITE ? "write" : "read");
+           type == Direction::WRITE ? "write" : "read");
   return true;
 }
 
-bool Operation::RestartReg(uint8_t reg, Type type) {
+bool Operation::RestartReg(uint8_t reg, Direction dir) {
   if (stopped_)
     return false;
   if (!cmd_) {
@@ -182,20 +184,17 @@ bool Operation::RestartReg(uint8_t reg, Type type) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = i2c_master_write_byte(cmd_, (slave_addr_ << 1) | I2C_MASTER_WRITE,
-                              ACK_CHECK_EN);
+  err = WriteAddress(cmd_, slave_addr_, addr_mode_, Direction::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
   err = i2c_master_write_byte(cmd_, reg, ACK_CHECK_EN);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  if (type == Type::WRITE)
+  if (dir == Direction::WRITE)
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
-  if (err == ESP_OK) {
-    err = i2c_master_write_byte(cmd_, (slave_addr_ << 1) | I2C_MASTER_READ,
-                                ACK_CHECK_EN);
-  }
+  if (err == ESP_OK)
+    err = WriteAddress(cmd_, slave_addr_, addr_mode_, Direction::READ);
 
 RESTART_DONE:
   if (err != ESP_OK) {
@@ -203,7 +202,7 @@ RESTART_DONE:
     return false;
   }
   ESP_LOGV(TAG, "%s restarted for %s.", name_,
-           type == Type::READ ? "read" : "write");
+           dir == Direction::READ ? "read" : "write");
   return true;
 }
 

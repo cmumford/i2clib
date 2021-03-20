@@ -4,13 +4,15 @@
  * This file is subject to the terms and conditions defined in
  * file 'license.txt', which is part of this source code package.
  */
+#pragma once
+
 #include <cstdint>
 
 #include <driver/i2c.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
-#pragma once
+#include <i2clib/address.h>
 
 namespace i2c {
 
@@ -22,7 +24,6 @@ namespace i2c {
  */
 class Operation {
  public:
-  enum class Type { READ, WRITE };
 
   enum class ExecuteEnd {
     SendStop,
@@ -70,9 +71,9 @@ class Operation {
    * devices will auto-increment the current register. This version of the
    * restart will not change the current register.
    *
-   * @param type        The operation type (i.e. read/write).
+   * @param dir        The operation type (i.e. read/write).
    */
-  bool Restart(Type type);
+  bool Restart(Direction dir);
 
   /**
    * Restart the I2C operation.
@@ -83,7 +84,7 @@ class Operation {
    * @param reg         The register where reading/writing will now commence.
    * @param type        The operation type (i.e. read/write).
    */
-  bool RestartReg(uint8_t reg, Type type);
+  bool RestartReg(uint8_t reg, Direction dir);
 
   /**
    * Execute all queued tasks.
@@ -110,14 +111,16 @@ class Operation {
 
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,
-            uint8_t slave_addr,
+            uint16_t slave_addr,
+            AddressMode addr_mode,
             SemaphoreHandle_t i2c_mutex,
             const char* op_name);
 
   bool stopped_;                 // Was I2C STOP ever written?
   i2c_cmd_handle_t cmd_;         // The started command.
   const i2c_port_t i2c_num_;     // I2C bus or port number.
-  const uint8_t slave_addr_;     // I2C slave address.
+  const uint16_t slave_addr_;    // I2C slave address.
+  const AddressMode addr_mode_;  // 7 or 10 bit I2C address.
   SemaphoreHandle_t i2c_mutex_;  // Mutex used for synchronization.
   const char* name_;             // The operation name - used for debugging.
 };
