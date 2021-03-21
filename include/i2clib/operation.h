@@ -24,7 +24,6 @@ namespace i2c {
  */
 class Operation {
  public:
-
   enum class ExecuteEnd {
     SendStop,
     NoStop,
@@ -57,7 +56,7 @@ class Operation {
   /**
    * @brief Queue a write operation.
    *
-   * @param val The data to write
+   * @param val The data to write.
    * @param num_bytes The size (in bytes) of \p val.
    *
    * @return true if successfully enqueued, false upon error.
@@ -71,9 +70,9 @@ class Operation {
    * devices will auto-increment the current register. This version of the
    * restart will not change the current register.
    *
-   * @param dir        The operation type (i.e. read/write).
+   * @param mode        The operation type (i.e. read/write).
    */
-  bool Restart(Direction dir);
+  bool Restart(Address::Mode mode);
 
   /**
    * Restart the I2C operation.
@@ -82,9 +81,9 @@ class Operation {
    * enqueue another start into this operation.
    *
    * @param reg         The register where reading/writing will now commence.
-   * @param type        The operation type (i.e. read/write).
+   * @param mode        The operation type (i.e. read/write).
    */
-  bool RestartReg(uint8_t reg, Direction dir);
+  bool RestartReg(uint8_t reg, Address::Mode mode);
 
   /**
    * Execute all queued tasks.
@@ -112,17 +111,17 @@ class Operation {
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,
             uint16_t slave_addr,
-            AddressMode addr_mode,
+            Address::Size addr_size,
             SemaphoreHandle_t i2c_mutex,
             const char* op_name);
 
-  bool stopped_;                 // Was I2C STOP ever written?
-  i2c_cmd_handle_t cmd_;         // The started command.
-  const i2c_port_t i2c_num_;     // I2C bus or port number.
-  const uint16_t slave_addr_;    // I2C slave address.
-  const AddressMode addr_mode_;  // 7 or 10 bit I2C address.
-  SemaphoreHandle_t i2c_mutex_;  // Mutex used for synchronization.
-  const char* name_;             // The operation name - used for debugging.
+  bool stopped_;                   // Was I2C STOP ever written?
+  i2c_cmd_handle_t cmd_;           // The started command.
+  const i2c_port_t i2c_num_;       // I2C bus or port number.
+  const uint16_t slave_addr_;      // I2C slave address.
+  const Address::Size addr_size_;  // 7 or 10 bit I2C address.
+  SemaphoreHandle_t i2c_mutex_;    // Mutex used for synchronization.
+  const char* name_;               // The operation name - used for debugging.
 };
 
 }  // namespace i2c

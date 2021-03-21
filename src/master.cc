@@ -37,14 +37,14 @@ constexpr size_t kSlaveTransmitBuffLen = 0;
 constexpr int kInterruptAllocFlags = ESP_INTR_FLAG_IRAM;
 
 i2c_cmd_handle_t StartCommand(uint16_t slave_addr,
-                              AddressMode addr_mode,
-                              Direction dir) {
+                              Address::Size addr_size,
+                              Address::Mode mode) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
   if (!cmd)
     return nullptr;
   esp_err_t err = i2c_master_start(cmd);
   if (err == ESP_OK)
-    err = WriteAddress(cmd, slave_addr, addr_mode, dir);
+    err = Address::Write(cmd, slave_addr, addr_size, mode);
   if (err != ESP_OK) {
     i2c_cmd_link_delete(cmd);
     return nullptr;
@@ -110,10 +110,10 @@ Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
 Master::~Master() = default;
 
 bool Master::WriteRegister(uint16_t addr,
-                           AddressMode addr_mode,
+                           Address::Size addr_size,
                            uint8_t reg,
                            uint8_t val) {
-  Operation op = CreateWriteOp(addr, addr_mode, reg, "WriteRegister");
+  Operation op = CreateWriteOp(addr, addr_size, reg, "WriteRegister");
   if (!op.ready())
     return false;
   if (!op.WriteByte(val))
@@ -122,10 +122,10 @@ bool Master::WriteRegister(uint16_t addr,
 }
 
 bool Master::ReadRegister(uint16_t addr,
-                          AddressMode addr_mode,
+                          Address::Size addr_size,
                           uint8_t reg,
                           uint8_t* val) {
-  Operation op = CreateReadOp(addr, addr_mode, reg, "ReadRegister");
+  Operation op = CreateReadOp(addr, addr_size, reg, "ReadRegister");
   if (!op.ready())
     return false;
   if (!op.Read(val, sizeof(*val)))
@@ -183,8 +183,8 @@ READ_DONE:
   return err == ESP_OK;
 }
 
-bool Master::Ping(uint16_t addr, AddressMode addr_mode) {
-  i2c_cmd_handle_t cmd = StartCommand(addr, addr_mode, Direction::WRITE);
+bool Master::Ping(uint16_t addr, Address::Size addr_size) {
+  i2c_cmd_handle_t cmd = StartCommand(addr, addr_size, Address::Mode::WRITE);
   if (!cmd)
     return false;
   esp_err_t err = i2c_master_stop(cmd);
@@ -207,10 +207,11 @@ PING_DONE:
 }
 
 Operation Master::CreateWriteOp(uint16_t slave_addr,
-                                AddressMode addr_mode,
+                                Address::Size addr_size,
                                 uint8_t reg,
                                 const char* op_name) {
-  i2c_cmd_handle_t cmd = StartCommand(slave_addr, addr_mode, Direction::WRITE);
+  i2c_cmd_handle_t cmd =
+      StartCommand(slave_addr, addr_size, Address::Mode::WRITE);
   if (!cmd)
     return Operation(op_name);
   esp_err_t err = i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
@@ -220,14 +221,15 @@ Operation Master::CreateWriteOp(uint16_t slave_addr,
     i2c_cmd_link_delete(cmd);
     return Operation(op_name);
   }
-  return Operation(cmd, i2c_num_, slave_addr, addr_mode, i2c_mutex_, op_name);
+  return Operation(cmd, i2c_num_, slave_addr, addr_size, i2c_mutex_, op_name);
 }
 
 Operation Master::CreateReadOp(uint16_t slave_addr,
-                               AddressMode addr_mode,
+                               Address::Size addr_size,
                                uint8_t reg,
                                const char* op_name) {
-  i2c_cmd_handle_t cmd = StartCommand(slave_addr, addr_mode, Direction::WRITE);
+  i2c_cmd_handle_t cmd =
+      StartCommand(slave_addr, addr_size, Address::Mode::WRITE);
   if (!cmd)
     return Operation(op_name);
   esp_err_t err = i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
@@ -235,7 +237,7 @@ Operation Master::CreateReadOp(uint16_t slave_addr,
     goto READ_OP_DONE;
   err = i2c_master_start(cmd);
   if (err == ESP_OK)
-    err = WriteAddress(cmd, slave_addr, addr_mode, Direction::READ);
+    err = Address::Write(cmd, slave_addr, addr_size, Address::Mode::READ);
 
 READ_OP_DONE:
   if (err != ESP_OK) {
@@ -243,11 +245,11 @@ READ_OP_DONE:
     i2c_cmd_link_delete(cmd);
     return Operation(op_name);
   }
-  return Operation(cmd, i2c_num_, slave_addr, addr_mode, i2c_mutex_, op_name);
+  return Operation(cmd, i2c_num_, slave_addr, addr_size, i2c_mutex_, op_name);
 }
 
 Operation Master::CreateReadOp(uint16_t slave_addr,
-                               AddressMode addr_mode,
+                               Address::Size addr_size,
                                const char* op_name) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
   if (!cmd)
@@ -257,7 +259,7 @@ Operation Master::CreateReadOp(uint16_t slave_addr,
   if (err != ESP_OK)
     goto DONE;
 
-  err = WriteAddress(cmd, slave_addr, addr_mode, Direction::READ);
+  err = Address::Write(cmd, slave_addr, addr_size, Address::Mode::READ);
 
 DONE:
   if (err != ESP_OK) {
@@ -265,7 +267,7 @@ DONE:
     i2c_cmd_link_delete(cmd);
     return Operation(op_name);
   }
-  return Operation(cmd, i2c_num_, slave_addr, addr_mode, i2c_mutex_, op_name);
+  return Operation(cmd, i2c_num_, slave_addr, addr_size, i2c_mutex_, op_name);
 }
 
 }  // namespace i2c

@@ -16,36 +16,48 @@
 namespace i2c {
 
 /**
- * Direction of operation.
+ * @brief Encapsulate writing an address to an I2C command buffer.
  *
- * Read or write.
+ * Properly handles 7 and 10-bit address sizes.
  */
-enum class Direction {
-  WRITE,  // The slave is being written to.
-  READ,   // The slave is being read from.
-};
+class Address {
+ public:
+  /**
+   * Mode of operation.
+   *
+   * Read or write.
+   */
+  enum class Mode {
+    WRITE,  // The slave is being written to.
+    READ,   // The slave is being read from.
+  };
 
-/**
- * I2C mode of address (7 or 10 bit).
- */
-enum class AddressMode {
-  bit7,   // 7-bit slave address.
-  bit10,  // 10-bit slave address.
-};
+  /**
+   * Size of I2C address (7 or 10 bit).
+   */
+  enum class Size {
+    bit7,   // 7-bit slave address.
+    bit10,  // 10-bit slave address.
+  };
 
-/**
- * @brief Write the I2C slave address into the command handle.
- *
- * @param cmd        The command buffer handle.
- * @param slave_addr The 7 or 10-bit slave address.
- * @param addr_mode  The address mode (7/10-bit).
- * @param direction  Is slave being written/read from/to?
- *
- * @return esp_err_t ESP_OK if successful.
- */
-esp_err_t WriteAddress(i2c_cmd_handle_t cmd,
-                       uint16_t slave_addr,
-                       AddressMode addr_mode,
-                       Direction direction);
+  /**
+   * @brief Write the I2C address into the command handle.
+   *
+   * @param cmd       The command buffer handle.
+   * @param address   The 7 or 10-bit address to write.
+   * @param addr_size The address size (7/10-bit).
+   * @param mode      The write mode (i.e. read/write).
+   *
+   * @return esp_err_t ESP_OK if the write was successful.
+   */
+  static esp_err_t Write(i2c_cmd_handle_t cmd,
+                         uint16_t address,
+                         Size addr_size,
+                         Mode mode);
+
+ private:
+  Address() = delete;
+  ~Address() = delete;
+};
 
 }  // namespace i2c

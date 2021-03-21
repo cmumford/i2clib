@@ -89,13 +89,14 @@ class Master {
    * Write a single byte value to the specified register.
    *
    * @param addr The I2C slave address.
+   * @param addr_size The address size.
    * @param reg  The I2C slave register.
    * @param val  The byte to write.
    *
    * @return true when successful, false when not.
    */
   bool WriteRegister(uint16_t addr,
-                     AddressMode addr_mode,
+                     Address::Size addr_size,
                      uint8_t reg,
                      uint8_t val);
 
@@ -103,13 +104,14 @@ class Master {
    * Read a single byte value from the specified register.
    *
    * @param addr The I2C slave address.
+   * @param addr_size The address size.
    * @param reg  The I2C slave register.
    * @param val  Location to store the read byte.
    *
    * @return true when successful, false when not.
    */
   bool ReadRegister(uint16_t addr,
-                    AddressMode addr_mode,
+                    Address::Size addr_size,
                     uint8_t reg,
                     uint8_t* val);
 
@@ -125,7 +127,7 @@ class Master {
    *
    * @return true if successful, false if not.
    */
-  bool Ping(uint16_t addr, AddressMode addr_mode);
+  bool Ping(uint16_t addr, Address::Size addr_size);
 
   /**
    * Start an I2C write operation to the I2C slave address.
@@ -133,7 +135,7 @@ class Master {
    * @return The operation pointer - null if error creating operation.
    */
   Operation CreateWriteOp(uint16_t slave_addr,
-                          AddressMode addr_mode,
+                          Address::Size addr_size,
                           uint8_t reg,
                           const char* op_name);
 
@@ -143,7 +145,7 @@ class Master {
    * @return The operation pointer - null if error creating operation.
    */
   Operation CreateReadOp(uint16_t slave_addr,
-                         AddressMode addr_mode,
+                         Address::Size addr_size,
                          uint8_t reg,
                          const char* op_name);
 
@@ -153,7 +155,7 @@ class Master {
    * @return The operation pointer - null if error creating operation.
    */
   Operation CreateReadOp(uint16_t slave_addr,
-                         AddressMode addr_mode,
+                         Address::Size addr_size,
                          const char* op_name);
 
  private:
