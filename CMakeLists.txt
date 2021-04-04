@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+idf_component_register(
+  SRCS
+    "src/address.cc"
+    "src/master.cc"
+    "src/operation.cc"
 
-if (NOT DEFINED PROJECT_NAME)
-  include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-  project(i2clib)
-endif (NOT DEFINED PROJECT_NAME)
+  INCLUDE_DIRS
+    "include"
+)
