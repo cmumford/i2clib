@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+#define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
 
 #include <driver/i2c.h>
