@@ -29,12 +29,9 @@ namespace i2c {
 
 namespace {
 
-constexpr char TAG[] = "I2C-base";
+constexpr char TAG[] = "I2C-master";
 constexpr bool ACK_CHECK_EN = true;
 constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
-constexpr size_t kSlaveReceiveBuffLen = 0;
-constexpr size_t kSlaveTransmitBuffLen = 0;
-constexpr int kInterruptAllocFlags = ESP_INTR_FLAG_IRAM;
 
 i2c_cmd_handle_t StartCommand(uint16_t slave_addr,
                               Address::Size addr_size,
@@ -53,56 +50,6 @@ i2c_cmd_handle_t StartCommand(uint16_t slave_addr,
 }
 
 }  // namespace
-
-// static
-bool Master::Initialize(const InitParams& params) {
-  const i2c_config_t config = {
-    .mode = I2C_MODE_MASTER,
-    .sda_io_num = params.sda_gpio,
-    .scl_io_num = params.scl_gpio,
-    .sda_pullup_en =
-        params.sda_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
-    .scl_pullup_en =
-        params.scl_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
-    .master =
-        {
-            .clk_speed = params.clk_speed,
-        },
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
-    .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL,
-#endif
-  };
-  esp_err_t err = i2c_param_config(params.i2c_bus, &config);
-  if (err == ESP_OK) {
-    err = i2c_driver_install(params.i2c_bus, I2C_MODE_MASTER,
-                             kSlaveReceiveBuffLen, kSlaveTransmitBuffLen,
-                             kInterruptAllocFlags);
-  }
-  if (err != ESP_OK) {
-    ESP_LOGE(TAG, "Error initializing I2C on port %u, SDA/SCL=%d/%d: %s",
-             params.i2c_bus, params.sda_gpio, params.scl_gpio,
-             esp_err_to_name(err));
-    return false;
-  }
-  ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", params.i2c_bus,
-           params.sda_gpio, params.scl_gpio);
-  return true;
-}
-
-// static
-bool Master::Shutdown(uint8_t i2c_bus) {
-  return i2c_driver_delete(i2c_bus) == ESP_OK;
-}
-
-// static
-bool Master::SetTimeout(uint8_t i2c_bus, int timeout) {
-  return i2c_set_timeout(i2c_bus, timeout) == ESP_OK;
-}
-
-// static
-bool Master::GetTimeout(uint8_t i2c_bus, int* timeout) {
-  return i2c_get_timeout(i2c_bus, timeout) == ESP_OK;
-}
 
 Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
     : i2c_num_(i2c_num), i2c_mutex_(i2c_mutex) {}

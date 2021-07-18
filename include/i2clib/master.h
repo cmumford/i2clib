@@ -28,55 +28,6 @@ class Operation;
 class Master {
  public:
   /**
-   * Initialization parameters for the I2C bus.
-   */
-  struct InitParams {
-    i2c_port_t i2c_bus;      // The I2C bus (AKA port).
-    uint8_t sda_gpio;        // The SDA (AKA SDIO) gpio pin number.
-    uint8_t scl_gpio;        // The SCL (AKA SDCL) gpio pin number.
-    uint32_t clk_speed;      // The I2C clock speed (Hz).
-    bool sda_pullup_enable;  // Enable build-in SDA/SDIO pin pullup resistor.
-    bool scl_pullup_enable;  // Enable build-in SCK/SCLK pin pullup resistor.
-  };
-
-  /**
-   * @brief Initialize an I2C bus.
-   *
-   * This only need be called once for each bus before creating instances of
-   * this class.
-   *
-   * @param params Master initialization parameters.
-   *
-   * @return true when successful, false when not.
-   */
-  static bool Initialize(const InitParams& params);
-
-  /**
-   * Shutdown the initialized I2C bus.
-   */
-  static bool Shutdown(uint8_t i2c_bus);
-
-  /**
-   * Set the I2C bus timeout.
-   *
-   * @param i2c_bus The I2C bus/port number.
-   * @param timeout Timeout (unit: APB 80Mhz clock cycle)
-   *
-   * @return true when successful, false when not.
-   */
-  static bool SetTimeout(uint8_t i2c_bus, int timeout);
-
-  /**
-   * Get the I2C bus timeout.
-   *
-   * @param i2c_bus The I2C bus/port number.
-   * @param timeout Timeout (unit: APB 80Mhz clock cycle)
-   *
-   * @return true when successful, false when not.
-   */
-  static bool GetTimeout(uint8_t i2c_bus, int* timeout);
-
-  /**
    * Construct a new Master object to interract with an I2C bus as a master.
    *
    * The name "Master" might be slightly misleading as there can be as many

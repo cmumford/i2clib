@@ -21,7 +21,7 @@ namespace i2c {
 class Operation;
 
 /**
- * Perform read and write operations on the specified I2C bus.
+ * I2C master with added simple functions to access registers.
  */
 class SimpleMaster : public Master {
  public:
