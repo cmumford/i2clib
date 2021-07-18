@@ -15,8 +15,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
-#include <i2clib/master.h>
-
 static_assert(!std::is_copy_constructible<i2c::Operation>::value,
               "i2c::Operation cannot be copy constructed");
 static_assert(std::is_move_constructible<i2c::Operation>::value,

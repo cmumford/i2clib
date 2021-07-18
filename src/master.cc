@@ -29,7 +29,7 @@ namespace i2c {
 
 namespace {
 
-constexpr char TAG[] = "I2C-master";
+constexpr char TAG[] = "I2C-base";
 constexpr bool ACK_CHECK_EN = true;
 constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
 constexpr size_t kSlaveReceiveBuffLen = 0;
@@ -108,30 +108,6 @@ Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
     : i2c_num_(i2c_num), i2c_mutex_(i2c_mutex) {}
 
 Master::~Master() = default;
-
-bool Master::WriteRegister(uint16_t addr,
-                           Address::Size addr_size,
-                           uint8_t reg,
-                           uint8_t val) {
-  Operation op = CreateWriteOp(addr, addr_size, reg, "WriteRegister");
-  if (!op.ready())
-    return false;
-  if (!op.WriteByte(val))
-    return false;
-  return op.Execute();
-}
-
-bool Master::ReadRegister(uint16_t addr,
-                          Address::Size addr_size,
-                          uint8_t reg,
-                          uint8_t* val) {
-  Operation op = CreateReadOp(addr, addr_size, reg, "ReadRegister");
-  if (!op.ready())
-    return false;
-  if (!op.Read(val, sizeof(*val)))
-    return false;
-  return op.Execute();
-}
 
 bool Master::Read(uint16_t slave_addr,
                   void* buff,
