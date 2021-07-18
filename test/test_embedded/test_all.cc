@@ -7,9 +7,9 @@
 
 #include <unity.h>
 
-#include <i2clib/master.h>
+#include <i2clib/simple_master.h>
 
-using i2c::Master;
+using i2c::SimpleMaster;
 
 /**
  * The I2C bus speed when running tests.
@@ -25,7 +25,7 @@ SemaphoreHandle_t g_i2c_mutex;
 namespace {
 
 bool InitI2C(uint8_t i2c_bus) {
-  const Master::InitParams params = {
+  const SimpleMaster::InitParams params = {
       .i2c_bus = i2c_bus,
       .sda_gpio = PORT_1_I2C_SDA_GPIO,
       .scl_gpio = PORT_1_I2C_CLK_GPIO,
@@ -33,7 +33,7 @@ bool InitI2C(uint8_t i2c_bus) {
       .sda_pullup_enable = false,
       .scl_pullup_enable = false,
   };
-  return Master::Initialize(params);
+  return SimpleMaster::Initialize(params);
 }
 
 void test_invalid_init_port() {
@@ -50,18 +50,18 @@ void test_double_init() {
 void test_create_master() {
   InitI2C(TEST_I2C_PORT1);
 
-  Master master(TEST_I2C_PORT1, g_i2c_mutex);
+  SimpleMaster master(TEST_I2C_PORT1, g_i2c_mutex);
   // Not much to test - no crash.
 }
 
 void test_shutdown_ok() {
   TEST_ASSERT_TRUE(InitI2C(TEST_I2C_PORT1));
 
-  TEST_ASSERT_TRUE(Master::Shutdown(TEST_I2C_PORT1));
+  TEST_ASSERT_TRUE(SimpleMaster::Shutdown(TEST_I2C_PORT1));
 }
 
 void test_shutdown_not_running() {
-  TEST_ASSERT_FALSE(Master::Shutdown(TEST_I2C_PORT1));
+  TEST_ASSERT_FALSE(SimpleMaster::Shutdown(TEST_I2C_PORT1));
 }
 
 void process() {
@@ -90,7 +90,7 @@ void WaitForDebugMonitor() {
 void setUp() {}
 
 void tearDown() {
-  Master::Shutdown(TEST_I2C_PORT1);
+  SimpleMaster::Shutdown(TEST_I2C_PORT1);
 }
 
 extern "C" void app_main() {

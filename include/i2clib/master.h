@@ -21,6 +21,9 @@ class Operation;
 
 /**
  * Perform read and write operations on the specified I2C bus.
+ *
+ * This implemens the basic functionality required for an I2C master
+ * IAW the I2C specificaion (UM10204).
  */
 class Master {
  public:
@@ -28,7 +31,7 @@ class Master {
    * Initialization parameters for the I2C bus.
    */
   struct InitParams {
-    uint8_t i2c_bus;         // The I2C bus (or port).
+    i2c_port_t i2c_bus;      // The I2C bus (AKA port).
     uint8_t sda_gpio;        // The SDA (AKA SDIO) gpio pin number.
     uint8_t scl_gpio;        // The SCL (AKA SDCL) gpio pin number.
     uint32_t clk_speed;      // The I2C clock speed (Hz).
@@ -37,7 +40,7 @@ class Master {
   };
 
   /**
-   * @brief Initialize an I2C bus master.
+   * @brief Initialize an I2C bus.
    *
    * This only need be called once for each bus before creating instances of
    * this class.
@@ -86,36 +89,6 @@ class Master {
   ~Master();
 
   /**
-   * Write a single byte value to the specified register.
-   *
-   * @param addr The I2C slave address.
-   * @param addr_size The address size.
-   * @param reg  The I2C slave register.
-   * @param val  The byte to write.
-   *
-   * @return true when successful, false when not.
-   */
-  bool WriteRegister(uint16_t addr,
-                     Address::Size addr_size,
-                     uint8_t reg,
-                     uint8_t val);
-
-  /**
-   * Read a single byte value from the specified register.
-   *
-   * @param addr The I2C slave address.
-   * @param addr_size The address size.
-   * @param reg  The I2C slave register.
-   * @param val  Location to store the read byte.
-   *
-   * @return true when successful, false when not.
-   */
-  bool ReadRegister(uint16_t addr,
-                    Address::Size addr_size,
-                    uint8_t reg,
-                    uint8_t* val);
-
-  /**
    * Read from the specified I2C slave.
    */
   bool Read(uint16_t slave_addr, void* buff, size_t buff_size, bool send_start);
@@ -158,7 +131,7 @@ class Master {
                          Address::Size addr_size,
                          const char* op_name);
 
- private:
+ protected:
   i2c_port_t i2c_num_;  // The I2C port on which this object communicates.
   SemaphoreHandle_t i2c_mutex_;  // Sync mutex. If null will not sync.
 };
