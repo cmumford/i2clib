@@ -36,11 +36,8 @@ SimpleMaster::SimpleMaster(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
 
 SimpleMaster::~SimpleMaster() = default;
 
-bool SimpleMaster::WriteRegister(uint16_t addr,
-                                 Address::Size addr_size,
-                                 uint8_t reg,
-                                 uint8_t val) {
-  Operation op = CreateWriteOp(addr, addr_size, reg, "WriteRegister");
+bool SimpleMaster::WriteRegister(Address::Addr addr, uint8_t reg, uint8_t val) {
+  Operation op = CreateWriteOp(addr, reg, "WriteRegister");
   if (!op.ready())
     return false;
   if (!op.WriteByte(val))
@@ -48,11 +45,8 @@ bool SimpleMaster::WriteRegister(uint16_t addr,
   return op.Execute();
 }
 
-bool SimpleMaster::ReadRegister(uint16_t addr,
-                                Address::Size addr_size,
-                                uint8_t reg,
-                                uint8_t* val) {
-  Operation op = CreateReadOp(addr, addr_size, reg, "ReadRegister");
+bool SimpleMaster::ReadRegister(Address::Addr addr, uint8_t reg, uint8_t* val) {
+  Operation op = CreateReadOp(addr, reg, "ReadRegister");
   if (!op.ready())
     return false;
   if (!op.Read(val, sizeof(*val)))

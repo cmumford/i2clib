@@ -42,7 +42,10 @@ class Master {
   /**
    * Read from the specified I2C slave.
    */
-  bool Read(uint16_t slave_addr, void* buff, size_t buff_size, bool send_start);
+  bool Read(Address::Addr slave_addr,
+            void* buff,
+            size_t buff_size,
+            bool send_start);
 
   /**
    * Detect if a slave device is listening at a specific address.
@@ -51,15 +54,14 @@ class Master {
    *
    * @return true if successful, false if not.
    */
-  bool Ping(uint16_t addr, Address::Size addr_size);
+  bool Ping(Address::Addr slave_addr);
 
   /**
    * Start an I2C write operation to the I2C slave address.
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateWriteOp(uint16_t slave_addr,
-                          Address::Size addr_size,
+  Operation CreateWriteOp(Address::Addr slave_addr,
                           uint8_t reg,
                           const char* op_name);
 
@@ -68,8 +70,7 @@ class Master {
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateReadOp(uint16_t slave_addr,
-                         Address::Size addr_size,
+  Operation CreateReadOp(Address::Addr slave_addr,
                          uint8_t reg,
                          const char* op_name);
 
@@ -78,9 +79,7 @@ class Master {
    *
    * @return The operation pointer - null if error creating operation.
    */
-  Operation CreateReadOp(uint16_t slave_addr,
-                         Address::Size addr_size,
-                         const char* op_name);
+  Operation CreateReadOp(Address::Addr slave_addr, const char* op_name);
 
  protected:
   i2c_port_t i2c_num_;  // The I2C port on which this object communicates.

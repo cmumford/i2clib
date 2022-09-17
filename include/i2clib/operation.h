@@ -110,18 +110,16 @@ class Operation {
 
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,
-            uint16_t slave_addr,
-            Address::Size addr_size,
+            Address::Addr slave_addr,
             SemaphoreHandle_t i2c_mutex,
             const char* op_name);
 
-  bool stopped_;                   // Was I2C STOP ever written?
-  i2c_cmd_handle_t cmd_;           // The started command.
-  const i2c_port_t i2c_num_;       // I2C bus or port number.
-  const uint16_t slave_addr_;      // I2C slave address.
-  const Address::Size addr_size_;  // 7 or 10 bit I2C address.
-  SemaphoreHandle_t i2c_mutex_;    // Mutex used for synchronization.
-  const char* name_;               // The operation name - used for debugging.
+  bool stopped_;                    // Was I2C STOP ever written?
+  i2c_cmd_handle_t cmd_;            // The started command.
+  const i2c_port_t i2c_num_;        // I2C bus or port number.
+  const Address::Addr slave_addr_;  // I2C slave address.
+  SemaphoreHandle_t i2c_mutex_;     // Mutex used for synchronization.
+  const char* name_;                // The operation name - used for debugging.
 };
 
 }  // namespace i2c

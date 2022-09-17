@@ -38,20 +38,20 @@ uint8_t Create7BitAddressByte(uint16_t slave_addr, Address::Mode mode) {
 
 // static
 esp_err_t Address::Write(i2c_cmd_handle_t cmd,
-                         uint16_t slave_addr,
-                         Address::Size addr_size,
+                         Address::Addr slave_addr,
                          Address::Mode mode) {
   esp_err_t err;
 
-  if (addr_size == Size::bit7) {
-    err = i2c_master_write_byte(cmd, Create7BitAddressByte(slave_addr, mode),
-                                ACK_CHECK_EN);
+  if (slave_addr.addr_size == Size::bit7) {
+    err = i2c_master_write_byte(
+        cmd, Create7BitAddressByte(slave_addr.address, mode), ACK_CHECK_EN);
   } else {
     err = i2c_master_write_byte(
-        cmd, Create10BitHighAddressByte(slave_addr, mode), ACK_CHECK_EN);
+        cmd, Create10BitHighAddressByte(slave_addr.address, mode),
+        ACK_CHECK_EN);
     if (err == ESP_OK) {
-      err = i2c_master_write_byte(cmd, Create10BitLowAddressByte(slave_addr),
-                                  ACK_CHECK_EN);
+      err = i2c_master_write_byte(
+          cmd, Create10BitLowAddressByte(slave_addr.address), ACK_CHECK_EN);
     }
   }
   return err;

@@ -43,31 +43,23 @@ class SimpleMaster : public Master {
    * Write a single byte value to the specified register.
    *
    * @param addr The I2C slave address.
-   * @param addr_size The address size.
    * @param reg  The I2C slave register.
    * @param val  The byte to write.
    *
    * @return true when successful, false when not.
    */
-  bool WriteRegister(uint16_t addr,
-                     Address::Size addr_size,
-                     uint8_t reg,
-                     uint8_t val);
+  bool WriteRegister(Address::Addr addr, uint8_t reg, uint8_t val);
 
   /**
    * Read a single byte value from the specified register.
    *
    * @param addr The I2C slave address.
-   * @param addr_size The address size.
    * @param reg  The I2C slave register.
    * @param val  Location to store the read byte.
    *
    * @return true when successful, false when not.
    */
-  bool ReadRegister(uint16_t addr,
-                    Address::Size addr_size,
-                    uint8_t reg,
-                    uint8_t* val);
+  bool ReadRegister(Address::Addr addr, uint8_t reg, uint8_t* val);
 };
 
 }  // namespace i2c

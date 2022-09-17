@@ -40,20 +40,21 @@ class Address {
     bit10,  // 10-bit slave address.
   };
 
+  struct Addr {
+    uint16_t address;
+    Size addr_size;
+  };
+
   /**
    * @brief Write the I2C address into the command handle.
    *
-   * @param cmd       The command buffer handle.
-   * @param address   The 7 or 10-bit address to write.
-   * @param addr_size The address size (7/10-bit).
-   * @param mode      The write mode (i.e. read/write).
+   * @param cmd    The command buffer handle.
+   * @param addr   The address and size to write.
+   * @param mode   The write mode (i.e. read/write).
    *
    * @return esp_err_t ESP_OK if the write was successful.
    */
-  static esp_err_t Write(i2c_cmd_handle_t cmd,
-                         uint16_t address,
-                         Size addr_size,
-                         Mode mode);
+  static esp_err_t Write(i2c_cmd_handle_t cmd, Addr addr, Mode mode);
 
  private:
   Address() = delete;

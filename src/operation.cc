@@ -36,22 +36,19 @@ Operation::Operation(const char* op_name)
     : stopped_(true),
       cmd_(nullptr),
       i2c_num_(0),
-      slave_addr_(0),
-      addr_size_(Address::Size::bit7),
+      slave_addr_{0, Address::Size::bit7},
       i2c_mutex_(nullptr),
       name_(op_name) {}
 
 Operation::Operation(i2c_cmd_handle_t cmd,
                      i2c_port_t i2c_num,
-                     uint16_t slave_addr,
-                     Address::Size addr_size,
+                     Address::Addr slave_addr,
                      SemaphoreHandle_t i2c_mutex,
                      const char* op_name)
     : stopped_(false),
       cmd_(cmd),
       i2c_num_(i2c_num),
       slave_addr_(slave_addr),
-      addr_size_(addr_size),
       i2c_mutex_(i2c_mutex),
       name_(op_name) {}
 
@@ -148,14 +145,14 @@ bool Operation::Restart(Address::Mode type) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = Address::Write(cmd_, slave_addr_, addr_size_, Address::Mode::WRITE);
+  err = Address::Write(cmd_, slave_addr_, Address::Mode::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
   if (type == Address::Mode::WRITE)
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
   if (err == ESP_OK) {
-    err = Address::Write(cmd_, slave_addr_, addr_size_, Address::Mode::READ);
+    err = Address::Write(cmd_, slave_addr_, Address::Mode::READ);
   }
 
 RESTART_DONE:
@@ -183,7 +180,7 @@ bool Operation::RestartReg(uint8_t reg, Address::Mode mode) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = Address::Write(cmd_, slave_addr_, addr_size_, Address::Mode::WRITE);
+  err = Address::Write(cmd_, slave_addr_, Address::Mode::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
   err = i2c_master_write_byte(cmd_, reg, ACK_CHECK_EN);
@@ -193,7 +190,7 @@ bool Operation::RestartReg(uint8_t reg, Address::Mode mode) {
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
   if (err == ESP_OK) {
-    err = Address::Write(cmd_, slave_addr_, addr_size_, Address::Mode::READ);
+    err = Address::Write(cmd_, slave_addr_, Address::Mode::READ);
   }
 
 RESTART_DONE:
