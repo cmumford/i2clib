@@ -48,7 +48,7 @@ class SimpleMaster : public Master {
    *
    * @return true when successful, false when not.
    */
-  bool WriteRegister(Address::Addr addr, uint8_t reg, uint8_t val);
+  bool WriteRegister(Address addr, uint8_t reg, uint8_t val);
 
   /**
    * Read a single byte value from the specified register.
@@ -59,7 +59,7 @@ class SimpleMaster : public Master {
    *
    * @return true when successful, false when not.
    */
-  bool ReadRegister(Address::Addr addr, uint8_t reg, uint8_t* val);
+  bool ReadRegister(Address addr, uint8_t reg, uint8_t* val);
 };
 
 }  // namespace i2c

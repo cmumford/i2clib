@@ -72,7 +72,7 @@ class Operation {
    *
    * @param mode        The operation type (i.e. read/write).
    */
-  bool Restart(Address::Mode mode);
+  bool Restart(AddressWriter::Mode mode);
 
   /**
    * Restart the I2C operation.
@@ -83,7 +83,7 @@ class Operation {
    * @param reg         The register where reading/writing will now commence.
    * @param mode        The operation type (i.e. read/write).
    */
-  bool RestartReg(uint8_t reg, Address::Mode mode);
+  bool RestartReg(uint8_t reg, AddressWriter::Mode mode);
 
   /**
    * Execute all queued tasks.
@@ -110,16 +110,16 @@ class Operation {
 
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,
-            Address::Addr slave_addr,
+            Address slave_addr,
             SemaphoreHandle_t i2c_mutex,
             const char* op_name);
 
-  bool stopped_;                    // Was I2C STOP ever written?
-  i2c_cmd_handle_t cmd_;            // The started command.
-  const i2c_port_t i2c_num_;        // I2C bus or port number.
-  const Address::Addr slave_addr_;  // I2C slave address.
-  SemaphoreHandle_t i2c_mutex_;     // Mutex used for synchronization.
-  const char* name_;                // The operation name - used for debugging.
+  bool stopped_;                 // Was I2C STOP ever written?
+  i2c_cmd_handle_t cmd_;         // The started command.
+  const i2c_port_t i2c_num_;     // I2C bus or port number.
+  const Address slave_addr_;     // I2C slave address.
+  SemaphoreHandle_t i2c_mutex_;  // Mutex used for synchronization.
+  const char* name_;             // The operation name - used for debugging.
 };
 
 }  // namespace i2c

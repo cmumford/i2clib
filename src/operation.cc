@@ -42,7 +42,7 @@ Operation::Operation(const char* op_name)
 
 Operation::Operation(i2c_cmd_handle_t cmd,
                      i2c_port_t i2c_num,
-                     Address::Addr slave_addr,
+                     Address slave_addr,
                      SemaphoreHandle_t i2c_mutex,
                      const char* op_name)
     : stopped_(false),
@@ -62,7 +62,7 @@ Operation::~Operation() {
 bool Operation::Read(void* dst, size_t num_bytes) {
   if (stopped_)
     return false;
-  if (!cmd_ && !Restart(Address::Mode::READ))
+  if (!cmd_ && !Restart(AddressWriter::Mode::READ))
     return false;
   esp_err_t err;
   if (num_bytes > 1) {
@@ -78,7 +78,7 @@ READ_END:
 }
 
 bool Operation::Write(const void* data, size_t num_bytes) {
-  if (!stopped_ && !cmd_ && !Restart(Address::Mode::WRITE))
+  if (!stopped_ && !cmd_ && !Restart(AddressWriter::Mode::WRITE))
     return false;
   // TODO: In newer IDF's data is const. Remove typecast eventually.
   return i2c_master_write(cmd_, (uint8_t*)(data), num_bytes, ACK_CHECK_EN) ==
@@ -88,7 +88,7 @@ bool Operation::Write(const void* data, size_t num_bytes) {
 bool Operation::WriteByte(uint8_t val) {
   if (stopped_)
     return false;
-  if (!cmd_ && !Restart(Address::Mode::WRITE))
+  if (!cmd_ && !Restart(AddressWriter::Mode::WRITE))
     return false;
   return i2c_master_write_byte(cmd_, val, I2C_MASTER_ACK) == ESP_OK;
 }
@@ -132,7 +132,7 @@ EXECUTE_END:
   return true;
 }
 
-bool Operation::Restart(Address::Mode type) {
+bool Operation::Restart(AddressWriter::Mode type) {
   if (stopped_)
     return false;
   if (!cmd_) {
@@ -145,29 +145,29 @@ bool Operation::Restart(Address::Mode type) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = Address::Write(cmd_, slave_addr_, Address::Mode::WRITE);
+  err = AddressWriter::Write(cmd_, slave_addr_, AddressWriter::Mode::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  if (type == Address::Mode::WRITE)
+  if (type == AddressWriter::Mode::WRITE)
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
   if (err == ESP_OK) {
-    err = Address::Write(cmd_, slave_addr_, Address::Mode::READ);
+    err = AddressWriter::Write(cmd_, slave_addr_, AddressWriter::Mode::READ);
   }
 
 RESTART_DONE:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s restart %s failed: %s (%p)", name_,
-             type == Address::Mode::WRITE ? "write" : "read",
+             type == AddressWriter::Mode::WRITE ? "write" : "read",
              esp_err_to_name(err), cmd_);
     return false;
   }
   ESP_LOGV(TAG, "%s restart %s success.", name_,
-           type == Address::Mode::WRITE ? "write" : "read");
+           type == AddressWriter::Mode::WRITE ? "write" : "read");
   return true;
 }
 
-bool Operation::RestartReg(uint8_t reg, Address::Mode mode) {
+bool Operation::RestartReg(uint8_t reg, AddressWriter::Mode mode) {
   if (stopped_)
     return false;
   if (!cmd_) {
@@ -180,17 +180,17 @@ bool Operation::RestartReg(uint8_t reg, Address::Mode mode) {
   esp_err_t err = i2c_master_start(cmd_);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  err = Address::Write(cmd_, slave_addr_, Address::Mode::WRITE);
+  err = AddressWriter::Write(cmd_, slave_addr_, AddressWriter::Mode::WRITE);
   if (err != ESP_OK)
     goto RESTART_DONE;
   err = i2c_master_write_byte(cmd_, reg, ACK_CHECK_EN);
   if (err != ESP_OK)
     goto RESTART_DONE;
-  if (mode == Address::Mode::WRITE)
+  if (mode == AddressWriter::Mode::WRITE)
     goto RESTART_DONE;
   err = i2c_master_start(cmd_);
   if (err == ESP_OK) {
-    err = Address::Write(cmd_, slave_addr_, Address::Mode::READ);
+    err = AddressWriter::Write(cmd_, slave_addr_, AddressWriter::Mode::READ);
   }
 
 RESTART_DONE:
@@ -199,7 +199,7 @@ RESTART_DONE:
     return false;
   }
   ESP_LOGV(TAG, "%s restarted for %s.", name_,
-           mode == Address::Mode::READ ? "read" : "write");
+           mode == AddressWriter::Mode::READ ? "read" : "write");
   return true;
 }
 
