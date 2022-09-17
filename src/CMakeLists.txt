@@ -1,8 +1,8 @@
 # This file was automatically generated for projects
 # without default 'CMakeLists.txt' file.
 
-set(SOURCES master.cc operation.cc)
+set(SOURCES address.cc bus.cc master.cc operation.cc simple_master.cc)
 
 idf_component_register(SRCS ${SOURCES})
 
-target_compile_definitions(${COMPONENT_LIB})
+target_compile_definitions(${COMPONENT_LIB} PUBLIC)
