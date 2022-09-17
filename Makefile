@@ -4,6 +4,7 @@ PLATFORMIO=${HOME}/.platformio/penv/bin/platformio
 
 # Port used for running tests.
 PORT=/dev/cu.SLAB_USBtoUART
+PORT=/dev/cu.usbserial-0001
 
 .PHONY: format
 format:
