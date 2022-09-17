@@ -36,7 +36,7 @@ Operation::Operation(const char* op_name)
     : stopped_(true),
       cmd_(nullptr),
       i2c_num_(0),
-      slave_addr_{0, Address::Size::bit7},
+      slave_addr_{0, Address::Size::k7bit},
       i2c_mutex_(nullptr),
       name_(op_name) {}
 

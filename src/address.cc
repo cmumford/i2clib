@@ -45,7 +45,7 @@ esp_err_t AddressWriter::Write(i2c_cmd_handle_t cmd,
                                Mode mode) {
   esp_err_t err;
 
-  if (slave_addr.addr_size == Address::Size::bit7) {
+  if (slave_addr.addr_size == Address::Size::k7bit) {
     err = i2c_master_write_byte(
         cmd, Create7BitAddressByte(slave_addr.address, mode), ACK_CHECK_EN);
   } else {

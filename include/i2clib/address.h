@@ -23,8 +23,8 @@ struct Address {
    * Size of I2C address (7 or 10 bit).
    */
   enum class Size {
-    bit7,   // 7-bit slave address.
-    bit10,  // 10-bit slave address.
+    k7bit,   // 7-bit slave address.
+    k10bit,  // 10-bit slave address.
   };
 
   uint16_t address;  // The 7 or 10-bit I2C address.
