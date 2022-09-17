@@ -105,7 +105,7 @@ READ_DONE:
 }
 
 bool Master::Ping(Address addr) {
-  i2c_cmd_handle_t cmd = StartCommand(addr, AddressWriter::Mode::WRITE);
+  i2c_cmd_handle_t cmd = StartCommand(addr, AddressWriter::Mode::kWrite);
   if (!cmd)
     return false;
   esp_err_t err = i2c_master_stop(cmd);
@@ -130,7 +130,7 @@ PING_DONE:
 Operation Master::CreateWriteOp(Address slave_addr,
                                 uint8_t reg,
                                 const char* op_name) {
-  i2c_cmd_handle_t cmd = StartCommand(slave_addr, AddressWriter::Mode::WRITE);
+  i2c_cmd_handle_t cmd = StartCommand(slave_addr, AddressWriter::Mode::kWrite);
   if (!cmd)
     return Operation(op_name);
   esp_err_t err = i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
@@ -146,7 +146,7 @@ Operation Master::CreateWriteOp(Address slave_addr,
 Operation Master::CreateReadOp(Address slave_addr,
                                uint8_t reg,
                                const char* op_name) {
-  i2c_cmd_handle_t cmd = StartCommand(slave_addr, AddressWriter::Mode::WRITE);
+  i2c_cmd_handle_t cmd = StartCommand(slave_addr, AddressWriter::Mode::kWrite);
   if (!cmd)
     return Operation(op_name);
   esp_err_t err = i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
@@ -154,7 +154,7 @@ Operation Master::CreateReadOp(Address slave_addr,
     goto READ_OP_DONE;
   err = i2c_master_start(cmd);
   if (err == ESP_OK)
-    err = AddressWriter::Write(cmd, slave_addr, AddressWriter::Mode::READ);
+    err = AddressWriter::Write(cmd, slave_addr, AddressWriter::Mode::kRead);
 
 READ_OP_DONE:
   if (err != ESP_OK) {
@@ -174,7 +174,7 @@ Operation Master::CreateReadOp(Address slave_addr, const char* op_name) {
   if (err != ESP_OK)
     goto DONE;
 
-  err = AddressWriter::Write(cmd, slave_addr, AddressWriter::Mode::READ);
+  err = AddressWriter::Write(cmd, slave_addr, AddressWriter::Mode::kRead);
 
 DONE:
   if (err != ESP_OK) {

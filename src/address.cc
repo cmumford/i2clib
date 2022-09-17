@@ -22,8 +22,8 @@ uint8_t Create10BitHighAddressByte(uint16_t slave_addr,
                                    AddressWriter::Mode mode) {
   // High byte starts with 0b11110.
   return 0b11110000 | ((slave_addr >> 7) & 0b00000110) |
-         (mode == AddressWriter::Mode::WRITE ? I2C_MASTER_WRITE
-                                             : I2C_MASTER_READ);
+         (mode == AddressWriter::Mode::kWrite ? I2C_MASTER_WRITE
+                                              : I2C_MASTER_READ);
 }
 
 uint8_t Create10BitLowAddressByte(uint16_t slave_addr) {
@@ -33,8 +33,8 @@ uint8_t Create10BitLowAddressByte(uint16_t slave_addr) {
 uint8_t Create7BitAddressByte(uint16_t slave_addr, AddressWriter::Mode mode) {
   configASSERT(!(slave_addr >> 9));  // Verify not using beyond 7 bits.
   return (slave_addr << 1) |
-         (mode == AddressWriter::Mode::WRITE ? I2C_MASTER_WRITE
-                                             : I2C_MASTER_READ);
+         (mode == AddressWriter::Mode::kWrite ? I2C_MASTER_WRITE
+                                              : I2C_MASTER_READ);
 }
 
 }  // namespace

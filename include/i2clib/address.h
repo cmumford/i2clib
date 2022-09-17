@@ -44,8 +44,8 @@ class AddressWriter {
    * Read or write.
    */
   enum class Mode {
-    WRITE,  // The slave is being written to.
-    READ,   // The slave is being read from.
+    kWrite,  // The slave is being written to.
+    kRead,   // The slave is being read from.
   };
 
   /**
