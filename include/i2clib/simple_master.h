@@ -15,6 +15,7 @@
 
 #include <i2clib/address.h>
 #include <i2clib/master.h>
+#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -48,7 +49,7 @@ class SimpleMaster : public Master {
    *
    * @return true when successful, false when not.
    */
-  bool WriteRegister(Address addr, uint8_t reg, uint8_t val);
+  Status WriteRegister(Address addr, uint8_t reg, uint8_t val);
 
   /**
    * Read a single byte value from the specified register.
@@ -59,7 +60,7 @@ class SimpleMaster : public Master {
    *
    * @return true when successful, false when not.
    */
-  bool ReadRegister(Address addr, uint8_t reg, uint8_t* val);
+  Status ReadRegister(Address addr, uint8_t reg, uint8_t* val);
 };
 
 }  // namespace i2c

@@ -14,6 +14,8 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
 
+#include "status_esp.h"
+
 static_assert(std::is_copy_constructible<i2c::Master>::value,
               "i2c::Master should be copy constructed");
 static_assert(std::is_move_constructible<i2c::Master>::value,
@@ -54,13 +56,13 @@ Master::Master(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
 
 Master::~Master() = default;
 
-bool Master::Read(Address slave_addr,
-                  void* buff,
-                  size_t buff_size,
-                  bool send_start) {
+Status Master::Read(Address slave_addr,
+                    void* buff,
+                    size_t buff_size,
+                    bool send_start) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
   if (!cmd)
-    return false;
+    return Status::Unknown();
   esp_err_t err = ESP_OK;
   if (send_start) {
     err = i2c_master_start(cmd);
@@ -101,13 +103,13 @@ READ_DONE:
     ESP_LOGV(TAG, "Read of %u bytes succeeded.", buff_size);
   }
 
-  return err == ESP_OK;
+  return ConvertEspStatus(err);
 }
 
-bool Master::Ping(Address addr) {
+Status Master::Ping(Address addr) {
   i2c_cmd_handle_t cmd = StartCommand(addr, AddressWriter::Mode::kWrite);
   if (!cmd)
-    return false;
+    return Status::Unknown();
   esp_err_t err = i2c_master_stop(cmd);
   if (err != ESP_OK)
     goto PING_DONE;
@@ -124,7 +126,7 @@ PING_DONE:
   if (err != ESP_OK)
     ESP_LOGE(TAG, "Ping 0x%x failed: %s", addr.address, esp_err_to_name(err));
   i2c_cmd_link_delete(cmd);
-  return err == ESP_OK;
+  return ConvertEspStatus(err);
 }
 
 Operation Master::CreateWriteOp(Address slave_addr,

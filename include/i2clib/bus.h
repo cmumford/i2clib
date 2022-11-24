@@ -13,6 +13,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include <i2clib/status.h>
+
 namespace i2c {
 
 class Operation;
@@ -43,12 +45,12 @@ class Bus {
    *
    * @return true when successful, false when not.
    */
-  static bool Initialize(const InitParams& params);
+  static Status Initialize(const InitParams& params);
 
   /**
    * Shutdown the initialized I2C bus.
    */
-  static bool Shutdown(uint8_t i2c_bus);
+  static Status Shutdown(uint8_t i2c_bus);
 
   /**
    * Set the I2C bus timeout.
@@ -58,7 +60,7 @@ class Bus {
    *
    * @return true when successful, false when not.
    */
-  static bool SetTimeout(uint8_t i2c_bus, int timeout);
+  static Status SetTimeout(uint8_t i2c_bus, int timeout);
 
   /**
    * Get the I2C bus timeout.
@@ -68,7 +70,7 @@ class Bus {
    *
    * @return true when successful, false when not.
    */
-  static bool GetTimeout(uint8_t i2c_bus, int* timeout);
+  static Status GetTimeout(uint8_t i2c_bus, int* timeout);
 
   Bus() = delete;
   ~Bus() = delete;

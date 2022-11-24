@@ -13,6 +13,7 @@
 #include <freertos/semphr.h>
 
 #include <i2clib/address.h>
+#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -46,12 +47,12 @@ class Operation {
    * @return true if the read is successfully queued (but not executed), false
    *         if not.
    */
-  bool Read(void* val, size_t num_bytes);
+  Status Read(void* val, size_t num_bytes);
 
   /**
    * Queue the write of a byte in this operation.
    */
-  bool WriteByte(uint8_t val);
+  Status WriteByte(uint8_t val);
 
   /**
    * @brief Queue a write operation.
@@ -61,7 +62,7 @@ class Operation {
    *
    * @return true if successfully enqueued, false upon error.
    */
-  bool Write(const void* val, size_t num_bytes);
+  Status Write(const void* val, size_t num_bytes);
 
   /**
    * Restart the I2C operation.
@@ -72,7 +73,7 @@ class Operation {
    *
    * @param mode        The operation type (i.e. read/write).
    */
-  bool Restart(AddressWriter::Mode mode);
+  Status Restart(AddressWriter::Mode mode);
 
   /**
    * Restart the I2C operation.
@@ -83,7 +84,7 @@ class Operation {
    * @param reg         The register where reading/writing will now commence.
    * @param mode        The operation type (i.e. read/write).
    */
-  bool RestartReg(uint8_t reg, AddressWriter::Mode mode);
+  Status RestartReg(uint8_t reg, AddressWriter::Mode mode);
 
   /**
    * Execute all queued tasks.
@@ -93,7 +94,7 @@ class Operation {
    *            actions will succeed. If not then further actions can be
    *            requested.
    */
-  bool Execute(ExecuteEnd end = ExecuteEnd::SendStop);
+  Status Execute(ExecuteEnd end = ExecuteEnd::SendStop);
 
   /**
    * Is this ready to be used?

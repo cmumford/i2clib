@@ -15,6 +15,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include "status_esp.h"
+
 static_assert(!std::is_copy_constructible<i2c::Operation>::value,
               "i2c::Operation cannot be copy constructed");
 static_assert(std::is_move_constructible<i2c::Operation>::value,
@@ -59,11 +61,14 @@ Operation::~Operation() {
   }
 }
 
-bool Operation::Read(void* dst, size_t num_bytes) {
+Status Operation::Read(void* dst, size_t num_bytes) {
   if (stopped_)
-    return false;
-  if (!cmd_ && !Restart(AddressWriter::Mode::kRead))
-    return false;
+    return Status::InvalidState();
+  if (!cmd_) {
+    Status s = Restart(AddressWriter::Mode::kRead);
+    if (!s.ok())
+      return s;
+  }
   esp_err_t err;
   if (num_bytes > 1) {
     err = i2c_master_read(cmd_, static_cast<uint8_t*>(dst), num_bytes - 1,
@@ -74,28 +79,34 @@ bool Operation::Read(void* dst, size_t num_bytes) {
   err = i2c_master_read_byte(cmd_, static_cast<uint8_t*>(dst) + num_bytes - 1,
                              I2C_MASTER_NACK);
 READ_END:
-  return err == ESP_OK;
+  return ConvertEspStatus(err);
 }
 
-bool Operation::Write(const void* data, size_t num_bytes) {
-  if (!stopped_ && !cmd_ && !Restart(AddressWriter::Mode::kWrite))
-    return false;
+Status Operation::Write(const void* data, size_t num_bytes) {
+  if (!stopped_ && !cmd_) {
+    Status s = Restart(AddressWriter::Mode::kWrite);
+    if (!s.ok())
+      return s;
+  }
   // TODO: In newer IDF's data is const. Remove typecast eventually.
-  return i2c_master_write(cmd_, (uint8_t*)(data), num_bytes, ACK_CHECK_EN) ==
-         ESP_OK;
+  return ConvertEspStatus(
+      i2c_master_write(cmd_, (uint8_t*)(data), num_bytes, ACK_CHECK_EN));
 }
 
-bool Operation::WriteByte(uint8_t val) {
+Status Operation::WriteByte(uint8_t val) {
   if (stopped_)
-    return false;
-  if (!cmd_ && !Restart(AddressWriter::Mode::kWrite))
-    return false;
-  return i2c_master_write_byte(cmd_, val, I2C_MASTER_ACK) == ESP_OK;
+    return Status::InvalidState();
+  if (!cmd_) {
+    Status s = Restart(AddressWriter::Mode::kWrite);
+    if (!s.ok())
+      return s;
+  }
+  return ConvertEspStatus(i2c_master_write_byte(cmd_, val, I2C_MASTER_ACK));
 }
 
-bool Operation::Execute(ExecuteEnd end_method) {
+Status Operation::Execute(ExecuteEnd end_method) {
   if (stopped_ || !cmd_)
-    return false;
+    return Status::InvalidState();
 
   ESP_LOGV(TAG, "Execute STOP:%c",
            end_method == ExecuteEnd::SendStop ? 'Y' : 'N');
@@ -125,21 +136,21 @@ EXECUTE_END:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "i2c_master_cmd_begin for %s on port %u failed: %s", name_,
              i2c_num_, esp_err_to_name(err));
-    return false;
+    return ConvertEspStatus(err);
   }
 
   ESP_LOGV(TAG, "%s completed successfully.", name_);
-  return true;
+  return Status::OK();
 }
 
-bool Operation::Restart(AddressWriter::Mode type) {
+Status Operation::Restart(AddressWriter::Mode type) {
   if (stopped_)
-    return false;
+    return Status::InvalidState();
   if (!cmd_) {
     cmd_ = i2c_cmd_link_create();
     if (!cmd_) {
       stopped_ = true;  // This operation is now ended.
-      return false;
+      return Status::Unknown();
     }
   }
   esp_err_t err = i2c_master_start(cmd_);
@@ -160,21 +171,21 @@ RESTART_DONE:
     ESP_LOGE(TAG, "%s restart %s failed: %s (%p)", name_,
              type == AddressWriter::Mode::kWrite ? "write" : "read",
              esp_err_to_name(err), cmd_);
-    return false;
+    return ConvertEspStatus(err);
   }
   ESP_LOGV(TAG, "%s restart %s success.", name_,
            type == AddressWriter::Mode::kWrite ? "write" : "read");
-  return true;
+  return Status::OK();
 }
 
-bool Operation::RestartReg(uint8_t reg, AddressWriter::Mode mode) {
+Status Operation::RestartReg(uint8_t reg, AddressWriter::Mode mode) {
   if (stopped_)
-    return false;
+    return Status::InvalidState();
   if (!cmd_) {
     cmd_ = i2c_cmd_link_create();
     if (!cmd_) {
       stopped_ = true;  // This operation is now ended.
-      return false;
+      return Status::Unknown();
     }
   }
   esp_err_t err = i2c_master_start(cmd_);
@@ -196,11 +207,11 @@ bool Operation::RestartReg(uint8_t reg, AddressWriter::Mode mode) {
 RESTART_DONE:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s restart failed: %s.", name_, esp_err_to_name(err));
-    return false;
+    return ConvertEspStatus(err);
   }
   ESP_LOGV(TAG, "%s restarted for %s.", name_,
            mode == AddressWriter::Mode::kRead ? "read" : "write");
-  return true;
+  return Status::OK();
 }
 
 }  // namespace i2c
