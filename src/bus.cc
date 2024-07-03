@@ -39,19 +39,19 @@ constexpr int kInterruptAllocFlags = ESP_INTR_FLAG_IRAM;
 // static
 Status Bus::Initialize(const InitParams& params) {
   const i2c_config_t config = {
-    .mode = I2C_MODE_MASTER,
-    .sda_io_num = params.sda_gpio,
-    .scl_io_num = params.scl_gpio,
-    .sda_pullup_en =
-        params.sda_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
-    .scl_pullup_en =
-        params.scl_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
-    .master =
-        {
-            .clk_speed = params.clk_speed,
-        },
+      .mode = I2C_MODE_MASTER,
+      .sda_io_num = params.sda_gpio,
+      .scl_io_num = params.scl_gpio,
+      .sda_pullup_en =
+          params.sda_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
+      .scl_pullup_en =
+          params.scl_pullup_enable ? GPIO_PULLUP_ENABLE : GPIO_PULLUP_DISABLE,
+      .master =
+          {
+              .clk_speed = params.clk_speed,
+          },
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
-    .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL,
+      .clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL,
 #endif
   };
   esp_err_t err = i2c_param_config(params.i2c_bus, &config);
