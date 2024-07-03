@@ -37,7 +37,7 @@ constexpr bool ACK_CHECK_EN = true;  ///< I2C master will check ack from slave.
 Operation::Operation(const char* op_name)
     : stopped_(true),
       cmd_(nullptr),
-      i2c_num_(0),
+      i2c_num_(I2C_NUM_0),
       slave_addr_{0, Address::Size::k7bit},
       i2c_mutex_(nullptr),
       name_(op_name) {}

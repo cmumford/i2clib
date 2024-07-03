@@ -72,17 +72,17 @@ Status Bus::Initialize(const InitParams& params) {
 }
 
 // static
-Status Bus::Shutdown(uint8_t i2c_bus) {
+Status Bus::Shutdown(i2c_port_t i2c_bus) {
   return ConvertEspStatus(i2c_driver_delete(i2c_bus));
 }
 
 // static
-Status Bus::SetTimeout(uint8_t i2c_bus, int timeout) {
+Status Bus::SetTimeout(i2c_port_t i2c_bus, int timeout) {
   return ConvertEspStatus(i2c_set_timeout(i2c_bus, timeout));
 }
 
 // static
-Status Bus::GetTimeout(uint8_t i2c_bus, int* timeout) {
+Status Bus::GetTimeout(i2c_port_t i2c_bus, int* timeout) {
   return ConvertEspStatus(i2c_get_timeout(i2c_bus, timeout));
 }
 

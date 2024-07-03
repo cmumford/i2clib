@@ -50,7 +50,7 @@ class Bus {
   /**
    * Shutdown the initialized I2C bus.
    */
-  static Status Shutdown(uint8_t i2c_bus);
+  static Status Shutdown(i2c_port_t i2c_bus);
 
   /**
    * Set the I2C bus timeout.
@@ -60,7 +60,7 @@ class Bus {
    *
    * @return true when successful, false when not.
    */
-  static Status SetTimeout(uint8_t i2c_bus, int timeout);
+  static Status SetTimeout(i2c_port_t i2c_bus, int timeout);
 
   /**
    * Get the I2C bus timeout.
@@ -70,7 +70,7 @@ class Bus {
    *
    * @return true when successful, false when not.
    */
-  static Status GetTimeout(uint8_t i2c_bus, int* timeout);
+  static Status GetTimeout(i2c_port_t i2c_bus, int* timeout);
 
   Bus() = delete;
   ~Bus() = delete;
