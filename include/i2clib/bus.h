@@ -10,10 +10,9 @@
 #include <cstdint>
 
 #include <driver/i2c.h>
+#include <esp_err.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
-
-#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -43,14 +42,14 @@ class Bus {
    *
    * @param params Bus initialization parameters.
    *
-   * @return true when successful, false when not.
+   * @return ESP_OK when successful, another value when not.
    */
-  static Status Initialize(const InitParams& params);
+  static esp_err_t Initialize(const InitParams& params);
 
   /**
    * Shutdown the initialized I2C bus.
    */
-  static Status Shutdown(i2c_port_t i2c_bus);
+  static esp_err_t Shutdown(i2c_port_t i2c_bus);
 
   /**
    * Set the I2C bus timeout.
@@ -58,9 +57,9 @@ class Bus {
    * @param i2c_bus The I2C bus/port number.
    * @param timeout Timeout (unit: APB 80Mhz clock cycle)
    *
-   * @return true when successful, false when not.
+   * @return ESP_OK when successful, another value when not.
    */
-  static Status SetTimeout(i2c_port_t i2c_bus, int timeout);
+  static esp_err_t SetTimeout(i2c_port_t i2c_bus, int timeout);
 
   /**
    * Get the I2C bus timeout.
@@ -68,9 +67,9 @@ class Bus {
    * @param i2c_bus The I2C bus/port number.
    * @param timeout Timeout (unit: APB 80Mhz clock cycle)
    *
-   * @return true when successful, false when not.
+   * @return ESP_OK when successful, another value when not.
    */
-  static Status GetTimeout(i2c_port_t i2c_bus, int* timeout);
+  static esp_err_t GetTimeout(i2c_port_t i2c_bus, int* timeout);
 
   Bus() = delete;
   ~Bus() = delete;

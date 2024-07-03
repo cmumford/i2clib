@@ -12,8 +12,6 @@
 #define LOG_LOCAL_LEVEL ESP_LOG_DEBUG
 #include <esp_log.h>
 
-#include "status_esp.h"
-
 static_assert(!std::is_copy_constructible<i2c::Bus>::value,
               "i2c::Bus should be copy constructed");
 static_assert(!std::is_move_constructible<i2c::Bus>::value,
@@ -37,7 +35,7 @@ constexpr int kInterruptAllocFlags = ESP_INTR_FLAG_IRAM;
 }  // namespace
 
 // static
-Status Bus::Initialize(const InitParams& params) {
+esp_err_t Bus::Initialize(const InitParams& params) {
   const i2c_config_t config = {
       .mode = I2C_MODE_MASTER,
       .sda_io_num = params.sda_gpio,
@@ -64,26 +62,26 @@ Status Bus::Initialize(const InitParams& params) {
     ESP_LOGE(TAG, "Error initializing I2C on port %u, SDA/SCL=%d/%d: %s",
              params.i2c_bus, params.sda_gpio, params.scl_gpio,
              esp_err_to_name(err));
-    return ConvertEspStatus(err);
+    return err;
   }
   ESP_LOGD(TAG, "I2C initialized on port %u, SDA/SCL=%d/%d.", params.i2c_bus,
            params.sda_gpio, params.scl_gpio);
-  return Status::OK();
+  return ESP_OK;
 }
 
 // static
-Status Bus::Shutdown(i2c_port_t i2c_bus) {
-  return ConvertEspStatus(i2c_driver_delete(i2c_bus));
+esp_err_t Bus::Shutdown(i2c_port_t i2c_bus) {
+  return i2c_driver_delete(i2c_bus);
 }
 
 // static
-Status Bus::SetTimeout(i2c_port_t i2c_bus, int timeout) {
-  return ConvertEspStatus(i2c_set_timeout(i2c_bus, timeout));
+esp_err_t Bus::SetTimeout(i2c_port_t i2c_bus, int timeout) {
+  return i2c_set_timeout(i2c_bus, timeout);
 }
 
 // static
-Status Bus::GetTimeout(i2c_port_t i2c_bus, int* timeout) {
-  return ConvertEspStatus(i2c_get_timeout(i2c_bus, timeout));
+esp_err_t Bus::GetTimeout(i2c_port_t i2c_bus, int* timeout) {
+  return i2c_get_timeout(i2c_bus, timeout);
 }
 
 }  // namespace i2c

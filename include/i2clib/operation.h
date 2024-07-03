@@ -9,11 +9,11 @@
 #include <cstdint>
 
 #include <driver/i2c.h>
+#include <esp_err.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
 #include <i2clib/address.h>
-#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -47,12 +47,12 @@ class Operation {
    * @return true if the read is successfully queued (but not executed), false
    *         if not.
    */
-  Status Read(void* val, size_t num_bytes);
+  esp_err_t Read(void* val, size_t num_bytes);
 
   /**
    * Queue the write of a byte in this operation.
    */
-  Status WriteByte(uint8_t val);
+  esp_err_t WriteByte(uint8_t val);
 
   /**
    * @brief Queue a write operation.
@@ -62,7 +62,7 @@ class Operation {
    *
    * @return true if successfully enqueued, false upon error.
    */
-  Status Write(const void* val, size_t num_bytes);
+  esp_err_t Write(const void* val, size_t num_bytes);
 
   /**
    * Restart the I2C operation.
@@ -73,7 +73,7 @@ class Operation {
    *
    * @param mode        The operation type (i.e. read/write).
    */
-  Status Restart(AddressWriter::Mode mode);
+  esp_err_t Restart(AddressWriter::Mode mode);
 
   /**
    * Restart the I2C operation.
@@ -84,7 +84,7 @@ class Operation {
    * @param reg         The register where reading/writing will now commence.
    * @param mode        The operation type (i.e. read/write).
    */
-  Status RestartReg(uint8_t reg, AddressWriter::Mode mode);
+  esp_err_t RestartReg(uint8_t reg, AddressWriter::Mode mode);
 
   /**
    * Execute all queued tasks.
@@ -94,7 +94,7 @@ class Operation {
    *            actions will succeed. If not then further actions can be
    *            requested.
    */
-  Status Execute(ExecuteEnd end = ExecuteEnd::SendStop);
+  esp_err_t Execute(ExecuteEnd end = ExecuteEnd::SendStop);
 
   /**
    * Is this ready to be used?

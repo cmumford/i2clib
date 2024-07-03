@@ -13,9 +13,9 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include <esp_err.h>
 #include <i2clib/address.h>
 #include <i2clib/master.h>
-#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -47,9 +47,9 @@ class SimpleMaster : public Master {
    * @param reg  The I2C slave register.
    * @param val  The byte to write.
    *
-   * @return true when successful, false when not.
+   * @return ESP_OK when successful, another value when not.
    */
-  Status WriteRegister(Address addr, uint8_t reg, uint8_t val);
+  esp_err_t WriteRegister(Address addr, uint8_t reg, uint8_t val);
 
   /**
    * Read a single byte value from the specified register.
@@ -58,9 +58,9 @@ class SimpleMaster : public Master {
    * @param reg  The I2C slave register.
    * @param val  Location to store the read byte.
    *
-   * @return true when successful, false when not.
+   * @return ESP_OK when successful, another value when not.
    */
-  Status ReadRegister(Address addr, uint8_t reg, uint8_t* val);
+  esp_err_t ReadRegister(Address addr, uint8_t reg, uint8_t* val);
 };
 
 }  // namespace i2c

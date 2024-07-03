@@ -7,17 +7,12 @@
 
 #include <unity.h>
 
+#include <esp_err.h>
 #include <i2clib/bus.h>
 #include <i2clib/simple_master.h>
-#include <i2clib/status.h>
 
 using i2c::Bus;
 using i2c::SimpleMaster;
-using i2c::Status;
-
-#define TEST_ASSERT_OK(s) TEST_ASSERT_TRUE(s.ok())
-
-#define TEST_ASSERT_NOT_OK(s) TEST_ASSERT_TRUE(!s.ok())
 
 /**
  * The I2C bus speed when running tests.
@@ -25,14 +20,15 @@ using i2c::Status;
  * Max of 1MHz recommended by:
  * https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/i2c.html#_CPPv4N12i2c_config_t9clk_speedE
  */
-constexpr int kI2CClockHz = 100000;
+constexpr int kI2CClockHz = 100'000;
 constexpr uint8_t kTestSlaveAddress = 0x68;
+constexpr i2c_port_t kValidTestPort = static_cast<i2c_port_t>(TEST_I2C_PORT1);
 
 SemaphoreHandle_t g_i2c_mutex;
 
 namespace {
 
-Status InitI2C(uint8_t i2c_bus) {
+esp_err_t InitI2C(i2c_port_t i2c_bus) {
   const Bus::InitParams params = {
       .i2c_bus = i2c_bus,
       .sda_gpio = PORT_1_I2C_SDA_GPIO,
@@ -45,31 +41,31 @@ Status InitI2C(uint8_t i2c_bus) {
 }
 
 void test_invalid_init_port() {
-  constexpr uint8_t kInvalidI2CPort = 200;
-  TEST_ASSERT_NOT_OK(InitI2C(kInvalidI2CPort));
+  constexpr i2c_port_t kInvalidI2CPort = static_cast<i2c_port_t>(200);
+  TEST_ASSERT_EQUAL(ESP_ERR_INVALID_ARG, InitI2C(kInvalidI2CPort));
 }
 
 void test_double_init() {
-  TEST_ASSERT_OK(InitI2C(TEST_I2C_PORT1));
+  TEST_ASSERT_EQUAL(ESP_OK, InitI2C(kValidTestPort));
 
-  TEST_ASSERT_NOT_OK(InitI2C(TEST_I2C_PORT1));
+  TEST_ASSERT_EQUAL(ESP_FAIL, InitI2C(kValidTestPort));
 }
 
 void test_create_master() {
-  InitI2C(TEST_I2C_PORT1);
+  InitI2C(kValidTestPort);
 
-  SimpleMaster master(TEST_I2C_PORT1, g_i2c_mutex);
+  SimpleMaster master(kValidTestPort, g_i2c_mutex);
   // Not much to test - no crash.
 }
 
 void test_shutdown_ok() {
-  TEST_ASSERT_OK(InitI2C(TEST_I2C_PORT1));
+  TEST_ASSERT_EQUAL(ESP_OK, InitI2C(kValidTestPort));
 
-  TEST_ASSERT_OK(Bus::Shutdown(TEST_I2C_PORT1));
+  TEST_ASSERT_EQUAL(ESP_OK, Bus::Shutdown(kValidTestPort));
 }
 
 void test_shutdown_not_running() {
-  TEST_ASSERT_NOT_OK(Bus::Shutdown(TEST_I2C_PORT1));
+  TEST_ASSERT_EQUAL(ESP_FAIL, Bus::Shutdown(kValidTestPort));
 }
 
 void process() {
@@ -98,7 +94,7 @@ void WaitForDebugMonitor() {
 void setUp() {}
 
 void tearDown() {
-  Bus::Shutdown(TEST_I2C_PORT1);
+  Bus::Shutdown(kValidTestPort);
 }
 
 extern "C" void app_main() {

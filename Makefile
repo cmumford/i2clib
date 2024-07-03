@@ -24,4 +24,4 @@ tags:
 
 .PHONY: test
 test:
-	${PLATFORMIO} test --test-port=${PORT}
+	${PLATFORMIO} test -vvv --test-port=${PORT} --upload-port=${PORT}

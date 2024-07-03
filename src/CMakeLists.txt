@@ -1,7 +1,7 @@
 # This file was automatically generated for projects
 # without default 'CMakeLists.txt' file.
 
-set(SOURCES address.cc bus.cc master.cc operation.cc simple_master.cc status_esp.cc)
+set(SOURCES address.cc bus.cc master.cc operation.cc simple_master.cc)
 
 idf_component_register(SRCS ${SOURCES})
 

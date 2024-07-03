@@ -10,11 +10,11 @@
 #include <cstdint>
 
 #include <driver/i2c.h>
+#include <esp_err.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
 #include <i2clib/address.h>
-#include <i2clib/status.h>
 
 namespace i2c {
 
@@ -43,10 +43,10 @@ class Master {
   /**
    * Read from the specified I2C slave.
    */
-  Status Read(Address slave_addr,
-              void* buff,
-              size_t buff_size,
-              bool send_start);
+  esp_err_t Read(Address slave_addr,
+                 void* buff,
+                 size_t buff_size,
+                 bool send_start);
 
   /**
    * Detect if a slave device is listening at a specific address.
@@ -55,7 +55,7 @@ class Master {
    *
    * @return true if successful, false if not.
    */
-  Status Ping(Address slave_addr);
+  esp_err_t Ping(Address slave_addr);
 
   /**
    * Start an I2C write operation to the I2C slave address.
