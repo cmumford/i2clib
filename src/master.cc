@@ -33,7 +33,7 @@ namespace {
 
 constexpr char TAG[] = "I2C-master";
 constexpr bool ACK_CHECK_EN = true;
-constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_RATE_MS;
+constexpr TickType_t kI2CCmdWaitTicks = 1000 / portTICK_PERIOD_MS;
 
 i2c_cmd_handle_t StartCommand(Address slave_addr, AddressWriter::Mode mode) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
