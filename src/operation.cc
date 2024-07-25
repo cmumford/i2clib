@@ -147,7 +147,7 @@ esp_err_t Operation::Restart(AddressWriter::Mode type) {
     cmd_ = i2c_cmd_link_create();
     if (!cmd_) {
       stopped_ = true;  // This operation is now ended.
-      return ESP_FAIL;
+      return ESP_ERR_NO_MEM;
     }
   }
   esp_err_t err = i2c_master_start(cmd_);
@@ -182,7 +182,7 @@ esp_err_t Operation::RestartReg(uint8_t reg, AddressWriter::Mode mode) {
     cmd_ = i2c_cmd_link_create();
     if (!cmd_) {
       stopped_ = true;  // This operation is now ended.
-      return ESP_FAIL;
+      return ESP_ERR_NO_MEM;
     }
   }
   esp_err_t err = i2c_master_start(cmd_);
