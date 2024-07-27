@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <expected>
 
 #include <driver/i2c.h>
 #include <esp_err.h>
@@ -60,23 +61,28 @@ class Master {
   /**
    * Start an I2C write operation to the I2C slave address.
    *
-   * @return The operation pointer - null if error creating operation.
+   * @return The operation object or error upon failure.
    */
-  Operation CreateWriteOp(Address slave_addr, uint8_t reg, const char* op_name);
+  std::expected<Operation, esp_err_t> CreateWriteOp(Address slave_addr,
+                                                    uint8_t reg,
+                                                    const char* op_name);
 
   /**
    * Start an I2C read operation to the I2C slave address.
    *
-   * @return The operation pointer - null if error creating operation.
+   * @return The operation object or error upon failure.
    */
-  Operation CreateReadOp(Address slave_addr, uint8_t reg, const char* op_name);
+  std::expected<Operation, esp_err_t> CreateReadOp(Address slave_addr,
+                                                   uint8_t reg,
+                                                   const char* op_name);
 
   /**
    * Create a started I2C read operation from the I2C slave address.
    *
-   * @return The operation pointer - null if error creating operation.
+   * @return The operation object or error upon failure.
    */
-  Operation CreateReadOp(Address slave_addr, const char* op_name);
+  std::expected<Operation, esp_err_t> CreateReadOp(Address slave_addr,
+                                                   const char* op_name);
 
  protected:
   i2c_port_t i2c_num_;  // The I2C port on which this object communicates.

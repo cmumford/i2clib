@@ -37,23 +37,25 @@ SimpleMaster::SimpleMaster(i2c_port_t i2c_num, SemaphoreHandle_t i2c_mutex)
 SimpleMaster::~SimpleMaster() = default;
 
 esp_err_t SimpleMaster::WriteRegister(Address addr, uint8_t reg, uint8_t val) {
-  Operation op = CreateWriteOp(addr, reg, "WriteRegister");
-  if (!op.ready())
-    return ESP_ERR_INVALID_STATE;
-  esp_err_t err = op.WriteByte(val);
+  std::expected<Operation, esp_err_t> op =
+      CreateWriteOp(addr, reg, "WriteRegister");
+  if (!op.has_value())
+    return op.error();
+  esp_err_t err = op.value().WriteByte(val);
   if (err != ESP_OK)
     return err;
-  return op.Execute();
+  return op.value().Execute();
 }
 
 esp_err_t SimpleMaster::ReadRegister(Address addr, uint8_t reg, uint8_t* val) {
-  Operation op = CreateReadOp(addr, reg, "ReadRegister");
-  if (!op.ready())
-    return ESP_ERR_INVALID_STATE;
-  esp_err_t err = op.Read(val, sizeof(*val));
+  std::expected<Operation, esp_err_t> op =
+      CreateReadOp(addr, reg, "ReadRegister");
+  if (!op.has_value())
+    return op.error();
+  esp_err_t err = op.value().Read(val, sizeof(*val));
   if (err != ESP_OK)
     return err;
-  return op.Execute();
+  return op.value().Execute();
 }
 
 }  // namespace i2c

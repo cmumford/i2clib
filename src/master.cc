@@ -132,30 +132,30 @@ PING_DONE:
   return err;
 }
 
-Operation Master::CreateWriteOp(Address slave_addr,
-                                uint8_t reg,
-                                const char* op_name) {
+std::expected<Operation, esp_err_t> Master::CreateWriteOp(Address slave_addr,
+                                                          uint8_t reg,
+                                                          const char* op_name) {
   std::expected<i2c_cmd_handle_t, esp_err_t> cmd =
       StartCommand(slave_addr, AddressWriter::Mode::kWrite);
   if (!cmd.has_value())
-    return Operation(op_name);
+    return std::unexpected(cmd.error());
   esp_err_t err = i2c_master_write_byte(cmd.value(), reg, ACK_CHECK_EN);
 
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s CreateWriteOp failed: %s", op_name, esp_err_to_name(err));
     i2c_cmd_link_delete(cmd.value());
-    return Operation(op_name);
+    return std::unexpected(err);
   }
   return Operation(cmd.value(), i2c_num_, slave_addr, i2c_mutex_, op_name);
 }
 
-Operation Master::CreateReadOp(Address slave_addr,
-                               uint8_t reg,
-                               const char* op_name) {
+std::expected<Operation, esp_err_t> Master::CreateReadOp(Address slave_addr,
+                                                         uint8_t reg,
+                                                         const char* op_name) {
   std::expected<i2c_cmd_handle_t, esp_err_t> cmd =
       StartCommand(slave_addr, AddressWriter::Mode::kWrite);
   if (!cmd.has_value())
-    return Operation(op_name);
+    return std::unexpected(cmd.error());
   esp_err_t err = i2c_master_write_byte(cmd.value(), reg, ACK_CHECK_EN);
   if (err != ESP_OK)
     goto READ_OP_DONE;
@@ -168,15 +168,16 @@ READ_OP_DONE:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s CreateReadOp failed: %s", op_name, esp_err_to_name(err));
     i2c_cmd_link_delete(cmd.value());
-    return Operation(op_name);
+    return std::unexpected(err);
   }
   return Operation(cmd.value(), i2c_num_, slave_addr, i2c_mutex_, op_name);
 }
 
-Operation Master::CreateReadOp(Address slave_addr, const char* op_name) {
+std::expected<Operation, esp_err_t> Master::CreateReadOp(Address slave_addr,
+                                                         const char* op_name) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
   if (!cmd)
-    return Operation(op_name);
+    return std::unexpected(ESP_ERR_NO_MEM);
 
   esp_err_t err = i2c_master_start(cmd);
   if (err != ESP_OK)
@@ -188,7 +189,7 @@ DONE:
   if (err != ESP_OK) {
     ESP_LOGE(TAG, "%s CreateReadOp failed: %s", op_name, esp_err_to_name(err));
     i2c_cmd_link_delete(cmd);
-    return Operation(op_name);
+    return std::unexpected(err);
   }
   return Operation(cmd, i2c_num_, slave_addr, i2c_mutex_, op_name);
 }
