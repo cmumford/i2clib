@@ -21,7 +21,6 @@ using i2c::SimpleMaster;
  * https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/i2c.html#_CPPv4N12i2c_config_t9clk_speedE
  */
 constexpr int kI2CClockHz = 100'000;
-constexpr uint8_t kTestSlaveAddress = 0x68;
 constexpr i2c_port_t kValidTestPort = static_cast<i2c_port_t>(TEST_I2C_PORT1);
 
 SemaphoreHandle_t g_i2c_mutex;
