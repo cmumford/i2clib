@@ -30,6 +30,7 @@ class Operation {
     NoStop,
   };
 
+  Operation() = delete;
   Operation(const Operation&) = delete;
   Operation(Operation&&) = default;
   ~Operation();
@@ -96,18 +97,8 @@ class Operation {
    */
   esp_err_t Execute(ExecuteEnd end = ExecuteEnd::SendStop);
 
-  /**
-   * Is this ready to be used?
-   */
-  bool ready() const { return !stopped_; }
-
  private:
   friend class Master;
-
-  /**
-   * Create an invalid (already stopped) operation.
-   */
-  Operation(const char* op_name);
 
   Operation(i2c_cmd_handle_t cmd,
             i2c_port_t i2c_num,

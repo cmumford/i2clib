@@ -32,14 +32,6 @@ constexpr TickType_t kI2CCmdWaitTicks = pdMS_TO_TICKS(1000);
 constexpr bool ACK_CHECK_EN = true;  ///< I2C master will check ack from slave.
 }  // namespace
 
-Operation::Operation(const char* op_name)
-    : stopped_(true),
-      cmd_(nullptr),
-      i2c_num_(I2C_NUM_0),
-      slave_addr_{0, Address::Size::k7bit},
-      i2c_mutex_(nullptr),
-      name_(op_name) {}
-
 Operation::Operation(i2c_cmd_handle_t cmd,
                      i2c_port_t i2c_num,
                      Address slave_addr,
