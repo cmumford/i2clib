@@ -12,6 +12,7 @@
 #include <driver/i2c.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <expected>
 
 #include <esp_err.h>
 #include <i2clib/address.h>
@@ -60,7 +61,7 @@ class SimpleMaster : public Master {
    *
    * @return ESP_OK when successful, another value when not.
    */
-  esp_err_t ReadRegister(Address addr, uint8_t reg, uint8_t* val);
+  std::expected<uint8_t, esp_err_t> ReadRegister(Address addr, uint8_t reg);
 };
 
 }  // namespace i2c

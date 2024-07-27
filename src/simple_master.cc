@@ -47,15 +47,20 @@ esp_err_t SimpleMaster::WriteRegister(Address addr, uint8_t reg, uint8_t val) {
   return op.value().Execute();
 }
 
-esp_err_t SimpleMaster::ReadRegister(Address addr, uint8_t reg, uint8_t* val) {
+std::expected<uint8_t, esp_err_t> SimpleMaster::ReadRegister(Address addr,
+                                                             uint8_t reg) {
   std::expected<Operation, esp_err_t> op =
       CreateReadOp(addr, reg, "ReadRegister");
   if (!op.has_value())
-    return op.error();
-  esp_err_t err = op.value().Read(val, sizeof(*val));
+    return std::unexpected(op.error());
+  uint8_t val;
+  esp_err_t err = op.value().Read(&val, sizeof(val));
   if (err != ESP_OK)
-    return err;
-  return op.value().Execute();
+    return std::unexpected(err);
+  err = op.value().Execute();
+  if (err != ESP_OK)
+    return std::unexpected(err);
+  return val;
 }
 
 }  // namespace i2c
