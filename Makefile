@@ -1,10 +1,12 @@
 
 # PlatformIO install location.
 PLATFORMIO=${HOME}/.platformio/penv/bin/platformio
+PLATFORMIO=platformio
 
 # Port used for running tests.
 PORT=/dev/cu.SLAB_USBtoUART
 PORT=/dev/cu.usbserial-0001
+PORT=/dev/cu.usbmodem101
 
 .PHONY: format
 format:
@@ -24,4 +26,4 @@ tags:
 
 .PHONY: test
 test:
-	${PLATFORMIO} test -vvv --test-port=${PORT} --upload-port=${PORT}
+	${PLATFORMIO} test --test-port=${PORT} --upload-port=${PORT} --environment=esp32
