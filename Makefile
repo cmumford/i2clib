@@ -15,7 +15,7 @@ docs: doxygen.conf Makefile include/i2clib/*.h src/*.cc
 
 .PHONY: clean
 clean:
-	${PLATFORMIO} --target clean
+	${PLATFORMIO} run --target clean
 	rm -rf docs
 
 .PHONY: tags
