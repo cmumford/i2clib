@@ -66,9 +66,8 @@ class Bus {
    * Get the I2C bus timeout.
    *
    * @param i2c_bus The I2C bus/port number.
-   * @param timeout Timeout (unit: APB 80Mhz clock cycle)
    *
-   * @return ESP_OK when successful, another value when not.
+   * @return The timeout when successful, else an error.
    */
   static std::expected<int, esp_err_t> GetTimeout(i2c_port_t i2c_bus);
 
