@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <expected>
 
 #include <driver/i2c.h>
 #include <esp_err.h>
@@ -69,7 +70,7 @@ class Bus {
    *
    * @return ESP_OK when successful, another value when not.
    */
-  static esp_err_t GetTimeout(i2c_port_t i2c_bus, int* timeout);
+  static std::expected<int, esp_err_t> GetTimeout(i2c_port_t i2c_bus);
 
   Bus() = delete;
   ~Bus() = delete;

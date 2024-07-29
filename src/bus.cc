@@ -80,8 +80,12 @@ esp_err_t Bus::SetTimeout(i2c_port_t i2c_bus, int timeout) {
 }
 
 // static
-esp_err_t Bus::GetTimeout(i2c_port_t i2c_bus, int* timeout) {
-  return i2c_get_timeout(i2c_bus, timeout);
+std::expected<int, esp_err_t> Bus::GetTimeout(i2c_port_t i2c_bus) {
+  int timeout;
+  esp_err_t err = i2c_get_timeout(i2c_bus, &timeout);
+  if (err != ESP_OK)
+    return std::unexpected(err);
+  return timeout;
 }
 
 }  // namespace i2c
