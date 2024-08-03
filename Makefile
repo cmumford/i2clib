@@ -2,15 +2,18 @@
 # PlatformIO install location.
 PLATFORMIO=${HOME}/.platformio/penv/bin/platformio
 PLATFORMIO=platformio
+CLANG_FORMAT=/opt/homebrew/bin/clang-format
 
 # Port used for running tests.
 PORT=/dev/cu.SLAB_USBtoUART
-PORT=/dev/cu.usbserial-0001
 PORT=/dev/cu.usbmodem101
+PORT=/dev/cu.usbserial-0001
+
+LIB_DIR=$(shell pwd)
 
 .PHONY: format
 format:
-	clang-format -i include/i2clib/*.h src/*.cc test/test_embedded/*.cc
+	${CLANG_FORMAT} -i include/i2clib/*.h src/*.cc test/test_embedded/*.cc
 
 docs: doxygen.conf Makefile include/i2clib/*.h src/*.cc
 	doxygen doxygen.conf
@@ -26,4 +29,4 @@ tags:
 
 .PHONY: test
 test:
-	${PLATFORMIO} test --test-port=${PORT} --upload-port=${PORT} --environment=esp32
+	${PLATFORMIO} test --project-dir=${LIB_DIR} --test-port=${PORT} --upload-port=${PORT} --environment=esp32
